@@ -63,6 +63,36 @@ class DirectLineClient extends EventTarget {
     return await resp.json();
   }
 
+  /**
+ * Send a structured value payload (used by Adaptive Card Action.Submit).
+ * Wraps it as a message activity with both `value` and `text` so the bot
+ * sees the action.
+ */
+async sendValue(value) {
+  if (!this.conversationId) throw new Error("Not connected");
+  const resp = await fetch(
+    `https://directline.botframework.com/v3/directline/conversations/${this.conversationId}/activities`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        type: "message",
+        from: { id: "user", name: "Guest" },
+        text: value?.action || "",   // fallback text the bot may log
+        value: value
+      })
+    }
+  );
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`Send failed: ${resp.status} ${body}`);
+  }
+  return await resp.json();
+}
+
   async _poll() {
     while (this.polling) {
       try {

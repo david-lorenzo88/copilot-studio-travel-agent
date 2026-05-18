@@ -2,7 +2,7 @@
    app.js
    Wires DirectLine, Azure Speech, and the chat UI.
    Voice mode: tap mic to start a hands-free conversation loop.
-   Auth: renders OAuth cards and handles the sign-in popup flow.
+   Adaptive cards: handles connection-manager and similar cards.
    ============================================================ */
 
 (() => {
@@ -78,100 +78,156 @@
     return wrap;
   }
 
+  // ---------- Adaptive card rendering ----------
+
   /**
-   * Detect and render an OAuth sign-in card. Returns the rendered element if
-   * the activity carried one; null otherwise.
+   * Renders an Adaptive Card subset sufficient for Copilot Studio's
+   * connection-manager card and similar prompts. Supports:
+   * - TextBlock (with inline markdown links and basic wrapping)
+   * - Column / ColumnSet (rendered as a flex row)
+   * - ActionSet with Action.Submit / Action.OpenUrl buttons
+   * Returns the rendered element or null if not an adaptive card.
    */
-  function renderOAuthCard(activity) {
+  function renderAdaptiveCard(activity) {
     const attachment = activity.attachments?.[0];
-    if (!attachment || attachment.contentType !== "application/vnd.microsoft.card.oauth") {
+    if (!attachment || attachment.contentType !== "application/vnd.microsoft.card.adaptive") {
       return null;
     }
-
-    const card = attachment.content || {};
-    const text = card.text || "Please sign in to continue.";
-    const button = card.buttons?.[0] || {};
-    const buttonText = button.title || "Sign in";
-    const signInUrl = button.value;
+    const card = attachment.content;
+    if (!card || card.type !== "AdaptiveCard") return null;
 
     const wrap = document.createElement("div");
-    wrap.className = "bubble bot";
-    const msg = document.createElement("div");
-    msg.textContent = text;
-    wrap.appendChild(msg);
+    wrap.className = "bubble bot adaptive";
 
-    const btn = document.createElement("button");
-    btn.className = "auth-button";
-    btn.textContent = buttonText;
-    btn.addEventListener("click", async () => {
-      btn.disabled = true;
-      btn.textContent = "Signing in…";
-      try {
-        await handleSignIn(card, signInUrl);
-        btn.textContent = "Signed in ✓";
-      } catch (err) {
-        console.error("Sign-in failed", err);
-        btn.disabled = false;
-        btn.textContent = buttonText;
-        addMeta(`Sign-in failed: ${err.message}`);
-      }
-    });
-    wrap.appendChild(btn);
+    if (Array.isArray(card.body)) {
+      for (const item of card.body) renderAdaptiveItem(item, wrap);
+    }
+    // Top-level actions (not in an ActionSet) — rare but possible
+    if (Array.isArray(card.actions) && card.actions.length > 0) {
+      renderActionSet({ actions: card.actions }, wrap);
+    }
 
     chat.appendChild(wrap);
     chat.scrollTop = chat.scrollHeight;
     return wrap;
   }
 
-  /**
-   * Open the OAuth sign-in flow in a popup. After completion, DirectLine
-   * forwards a token to the bot automatically; we just wait for the popup
-   * to close and let the bot continue the conversation.
-   */
-  async function handleSignIn(card, prebuiltUrl) {
-    let signInUrl = prebuiltUrl;
+  function renderAdaptiveItem(item, parent) {
+    if (!item || !item.type) return;
 
-    if (!signInUrl || !signInUrl.startsWith("http")) {
-      const connectionName = card.connectionName;
-      if (!connectionName) throw new Error("OAuth card has no connectionName");
-      try {
-        const resp = await dl.getSignInUrl(connectionName);
-        signInUrl = resp.signInUrl || resp.link || resp.url;
-      } catch (e) {
-        throw new Error("Could not retrieve sign-in URL: " + e.message);
+    switch (item.type) {
+      case "TextBlock": {
+        const p = document.createElement("p");
+        p.className = "ac-text";
+        if (item.wrap !== false) p.style.whiteSpace = "normal";
+        // Minimal markdown: links [text](url) and line breaks
+        p.innerHTML = markdownLite(item.text || "");
+        parent.appendChild(p);
+        break;
       }
-    }
-
-    if (!signInUrl) throw new Error("No sign-in URL available");
-
-    const popup = window.open(
-      signInUrl,
-      "agentSignIn",
-      "width=500,height=700,menubar=no,toolbar=no,location=no,status=no"
-    );
-
-    if (!popup) {
-      throw new Error("Sign-in popup was blocked. Please allow popups for this site.");
-    }
-
-    await new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(interval);
-          resolve();
+      case "ColumnSet": {
+        const row = document.createElement("div");
+        row.className = "ac-row";
+        if (Array.isArray(item.columns)) {
+          for (const col of item.columns) renderAdaptiveItem(col, row);
         }
-      }, 500);
-      setTimeout(() => {
-        clearInterval(interval);
-        try { popup.close(); } catch {}
-        resolve();
-      }, 180000);
+        parent.appendChild(row);
+        break;
+      }
+      case "Column": {
+        const col = document.createElement("div");
+        col.className = "ac-col";
+        if (item.width && typeof item.width === "string") {
+          // Numeric strings like "40" → flex grow weight
+          const n = parseFloat(item.width);
+          if (!isNaN(n)) col.style.flex = String(n);
+        }
+        if (Array.isArray(item.items)) {
+          for (const child of item.items) renderAdaptiveItem(child, col);
+        }
+        parent.appendChild(col);
+        break;
+      }
+      case "ActionSet": {
+        renderActionSet(item, parent);
+        break;
+      }
+      case "Container": {
+        const c = document.createElement("div");
+        c.className = "ac-container";
+        if (Array.isArray(item.items)) {
+          for (const child of item.items) renderAdaptiveItem(child, c);
+        }
+        parent.appendChild(c);
+        break;
+      }
+      default:
+        // Unknown type — silently skip
+        console.debug("Unhandled adaptive item type:", item.type, item);
+    }
+  }
+
+  function renderActionSet(item, parent) {
+    if (!Array.isArray(item.actions) || item.actions.length === 0) return;
+    const row = document.createElement("div");
+    row.className = "ac-actions";
+    for (const action of item.actions) {
+      const btn = document.createElement("button");
+      btn.className = "ac-button";
+      if (action.style === "positive") btn.classList.add("ac-button-positive");
+      if (action.style === "destructive") btn.classList.add("ac-button-destructive");
+      btn.textContent = action.title || "Action";
+      btn.addEventListener("click", () => handleAdaptiveAction(action, btn));
+      row.appendChild(btn);
+    }
+    parent.appendChild(row);
+  }
+
+  /**
+   * Handle an Action.Submit or Action.OpenUrl from an adaptive card.
+   * Action.Submit sends the action's `data` object back to the bot.
+   * Action.OpenUrl opens a popup (so a sign-in or external page doesn't
+   * navigate us away from the chat).
+   */
+  function handleAdaptiveAction(action, btn) {
+    if (action.type === "Action.OpenUrl" && action.url) {
+      window.open(action.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    // Default: Action.Submit
+    const data = action.data || {};
+    btn.disabled = true;
+    btn.textContent = btn.textContent + "…";
+
+    // Show what the user "did" in the chat for clarity
+    if (data.action) {
+      addBubble("user", data.action);
+    }
+
+    // Send via DirectLine. For connection-manager retry, the bot expects
+    // a message activity carrying `value` with the data.
+    dl.sendValue(data).catch(err => {
+      addMeta(`Action failed: ${err.message}`);
+      btn.disabled = false;
     });
   }
 
   /**
-   * Convert bot reply text (which may include URLs, markdown, asterisks)
-   * into something Azure Speech will pronounce naturally.
+   * Minimal markdown converter — handles [text](url) links and \n line breaks.
+   * Escapes HTML special characters first to avoid injection.
+   */
+  function markdownLite(s) {
+    const esc = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const linked = esc.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+      // Open in popup so we don't navigate away from the chat
+      const safeUrl = url.replace(/"/g, "&quot;");
+      return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="ac-link">${label}</a>`;
+    });
+    return linked.replace(/\n/g, "<br>");
+  }
+
+  /**
+   * Convert bot reply text into something Azure Speech can pronounce.
    */
   function textForSpeech(raw) {
     if (!raw) return "";
@@ -197,20 +253,26 @@
     const act = e.detail;
     if (act.type !== "message") return;
 
-    // OAuth card first — these have no plain-text fallback worth showing
-    const oauthRendered = renderOAuthCard(act);
+    // Try renderers in order of specificity
+    const adaptiveRendered = renderAdaptiveCard(act);
+    const hotelRendered = adaptiveRendered ? null : renderHotelCards(act);
 
-    // Otherwise try structured hotel results, then plain text
-    const hotelRendered = oauthRendered ? null : renderHotelCards(act);
-    if (!oauthRendered && !hotelRendered && act.text) {
-      addBubble("bot", act.text);
+    if (!adaptiveRendered && !hotelRendered) {
+      if (act.text) {
+        addBubble("bot", act.text);
+      } else if (act.speak) {
+        addBubble("bot", act.speak);
+      } else if (act.attachments?.length > 0) {
+        console.warn("Unrendered attachment", act.attachments[0]);
+        addMeta("(received a structured message I couldn't display)");
+      }
     }
 
     if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
     if (pendingReply) {
       const r = pendingReply;
       pendingReply = null;
-      r(act.text || "");
+      r(act.text || act.speak || "");
     }
   });
 
@@ -231,7 +293,7 @@
           if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
           resolve("Still working on that. Want to try a different question?");
         }
-      }, 20000);
+      }, 60000);
     });
   }
 
