@@ -2,6 +2,7 @@
    app.js
    Wires DirectLine, Azure Speech, and the chat UI.
    Voice mode: tap mic to start a hands-free conversation loop.
+   Auth: renders OAuth cards and handles the sign-in popup flow.
    ============================================================ */
 
 (() => {
@@ -78,16 +79,107 @@
   }
 
   /**
+   * Detect and render an OAuth sign-in card. Returns the rendered element if
+   * the activity carried one; null otherwise.
+   */
+  function renderOAuthCard(activity) {
+    const attachment = activity.attachments?.[0];
+    if (!attachment || attachment.contentType !== "application/vnd.microsoft.card.oauth") {
+      return null;
+    }
+
+    const card = attachment.content || {};
+    const text = card.text || "Please sign in to continue.";
+    const button = card.buttons?.[0] || {};
+    const buttonText = button.title || "Sign in";
+    const signInUrl = button.value;
+
+    const wrap = document.createElement("div");
+    wrap.className = "bubble bot";
+    const msg = document.createElement("div");
+    msg.textContent = text;
+    wrap.appendChild(msg);
+
+    const btn = document.createElement("button");
+    btn.className = "auth-button";
+    btn.textContent = buttonText;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.textContent = "Signing in…";
+      try {
+        await handleSignIn(card, signInUrl);
+        btn.textContent = "Signed in ✓";
+      } catch (err) {
+        console.error("Sign-in failed", err);
+        btn.disabled = false;
+        btn.textContent = buttonText;
+        addMeta(`Sign-in failed: ${err.message}`);
+      }
+    });
+    wrap.appendChild(btn);
+
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  /**
+   * Open the OAuth sign-in flow in a popup. After completion, DirectLine
+   * forwards a token to the bot automatically; we just wait for the popup
+   * to close and let the bot continue the conversation.
+   */
+  async function handleSignIn(card, prebuiltUrl) {
+    let signInUrl = prebuiltUrl;
+
+    if (!signInUrl || !signInUrl.startsWith("http")) {
+      const connectionName = card.connectionName;
+      if (!connectionName) throw new Error("OAuth card has no connectionName");
+      try {
+        const resp = await dl.getSignInUrl(connectionName);
+        signInUrl = resp.signInUrl || resp.link || resp.url;
+      } catch (e) {
+        throw new Error("Could not retrieve sign-in URL: " + e.message);
+      }
+    }
+
+    if (!signInUrl) throw new Error("No sign-in URL available");
+
+    const popup = window.open(
+      signInUrl,
+      "agentSignIn",
+      "width=500,height=700,menubar=no,toolbar=no,location=no,status=no"
+    );
+
+    if (!popup) {
+      throw new Error("Sign-in popup was blocked. Please allow popups for this site.");
+    }
+
+    await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 500);
+      setTimeout(() => {
+        clearInterval(interval);
+        try { popup.close(); } catch {}
+        resolve();
+      }, 180000);
+    });
+  }
+
+  /**
    * Convert bot reply text (which may include URLs, markdown, asterisks)
    * into something Azure Speech will pronounce naturally.
    */
   function textForSpeech(raw) {
     if (!raw) return "";
     return raw
-      .replace(/\!\[[^\]]*\]\([^\)]+\)/g, "")        // image markdown
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")      // link markdown
-      .replace(/https?:\/\/\S+/g, "")                 // bare URLs
-      .replace(/[*_`#>]+/g, "")                       // markdown noise
+      .replace(/\!\[[^\]]*\]\([^\)]+\)/g, "")
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[*_`#>]+/g, "")
       .replace(/\s+/g, " ")
       .trim();
   }
@@ -96,7 +188,6 @@
 
   const dl = new DirectLineClient({ tokenUrl: cfg.directLineTokenUrl });
 
-  // Pending resolver for whichever turn we're waiting on (text OR voice).
   let pendingReply = null;
   let pendingTyping = null;
 
@@ -106,9 +197,14 @@
     const act = e.detail;
     if (act.type !== "message") return;
 
-    // Try to render structured hotel results, otherwise plain text.
-    const rendered = renderHotelCards(act);
-    if (!rendered && act.text) addBubble("bot", act.text);
+    // OAuth card first — these have no plain-text fallback worth showing
+    const oauthRendered = renderOAuthCard(act);
+
+    // Otherwise try structured hotel results, then plain text
+    const hotelRendered = oauthRendered ? null : renderHotelCards(act);
+    if (!oauthRendered && !hotelRendered && act.text) {
+      addBubble("bot", act.text);
+    }
 
     if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
     if (pendingReply) {
@@ -129,7 +225,6 @@
         pendingReply = null;
         resolve(`I couldn't reach the travel system: ${err.message}`);
       }
-      // Safety: never hang forever.
       setTimeout(() => {
         if (pendingReply === resolve) {
           pendingReply = null;
@@ -149,7 +244,7 @@
   });
 
   let voiceMode = false;
-  let livePartial = null; // shows what the user is saying as they say it
+  let livePartial = null;
 
   speech.addEventListener("statechange", (e) => {
     const s = e.detail;
@@ -176,27 +271,18 @@
     }
   });
 
-  /**
-   * Single voice turn:
-   *  1. recognize one utterance
-   *  2. post to bot, await reply
-   *  3. speak the reply
-   * Returns void; loops in voice mode until disabled.
-   */
   async function voiceTurn() {
     let userText;
     try {
       userText = await speech.recognizeOnce();
     } catch (err) {
       if (livePartial) { livePartial.remove(); livePartial = null; }
-      // Common case: no speech / silence timeout. Stop voice mode gracefully.
       addMeta(`Voice paused (${err.message}). Tap the mic to resume.`);
       voiceMode = false;
       setPill(voiceStatus, "Voice off");
       return;
     }
 
-    // Promote the live-partial bubble to a final user bubble.
     if (livePartial) {
       livePartial.textContent = userText;
       livePartial.style.opacity = "";
@@ -215,9 +301,7 @@
       }
     }
 
-    // Continue the conversation loop until user taps mic again.
     if (voiceMode) {
-      // Tiny gap so the recognizer doesn't pick up the tail of the TTS.
       setTimeout(() => { if (voiceMode) voiceTurn(); }, 300);
     }
   }

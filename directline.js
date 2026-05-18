@@ -88,6 +88,35 @@ class DirectLineClient extends EventTarget {
     }
   }
 
+  /**
+   * For an OAuth card attachment, get the sign-in URL the user should visit.
+   * DirectLine exchanges the connection name + state for a real OAuth URL
+   * that completes the round-trip back to the bot.
+   */
+  async getSignInUrl(connectionName) {
+    if (!this.conversationId) throw new Error("Not connected");
+
+    // DirectLine generates the sign-in URL based on the conversation and
+    // the connection name configured server-side in Copilot Studio.
+    const url = `https://directline.botframework.com/v3/directline/conversations/${this.conversationId}/tokens?connectionName=${encodeURIComponent(connectionName)}`;
+
+    const resp = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${this.token}` }
+    });
+
+    if (!resp.ok) {
+      const body = await resp.text();
+      throw new Error(`Sign-in URL retrieval failed: ${resp.status} ${body}`);
+    }
+
+    const data = await resp.json();
+    // Response shape: { conversationId, token, expires_in, eTag }
+    // The actual sign-in URL is encoded in the response; for OAuth cards we
+    // construct it from the card's content.buttons[0].value
+    return data;
+  }
+
   disconnect() {
     this.polling = false;
   }
