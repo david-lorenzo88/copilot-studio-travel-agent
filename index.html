@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel Assistant · Multi-Agent Demo</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <!-- Azure AI Speech JavaScript SDK -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-name">Travel Assistant</span>
+      </div>
+      <div class="status-pills">
+        <span id="connectionStatus" class="pill pill-muted">Connecting…</span>
+        <span id="voiceStatus" class="pill pill-muted">Voice off</span>
+      </div>
+    </header>
+
+    <main class="chat" id="chat" aria-live="polite"></main>
+
+    <footer class="composer">
+      <button id="micButton" class="mic" aria-label="Toggle voice mode" title="Tap to talk">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/>
+        </svg>
+      </button>
+      <form id="composeForm" class="compose">
+        <input
+          id="composeInput"
+          type="text"
+          autocomplete="off"
+          placeholder="Ask about a trip, hotel, restaurants…"
+          aria-label="Type your message"
+        />
+        <button type="submit" class="send" aria-label="Send">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="currentColor" d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.16L4 11l9 1-9 1-1.99 6.24a1 1 0 0 0 1.39 1.16z"/>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <!-- Config: edit before deploying. -->
+  <script>
+    window.AppConfig = {
+      // Endpoint that mints a short-lived DirectLine token. Keep the long-lived
+      // bot secret in the function's app settings only.
+      directLineTokenUrl: "/api/directline/token",
+
+      // Endpoint that mints a short-lived Speech authorization token. Keeps the
+      // Foundry / Speech resource key off the browser.
+      speechTokenUrl: "/api/speech/token",
+
+      // Recognition language. Use "auto" via SourceLanguageAutoDetect if you
+      // want multilingual on stage; "es-ES" or "en-US" otherwise.
+      speechRecognitionLanguage: "en-US",
+
+      // Voice for synthesis. Multilingual voices like en-US-AvaMultilingualNeural
+      // and es-ES-XimenaMultilingualNeural can speak across languages from the
+      // same voice profile.
+      speechSynthesisVoice: "en-US-AvaMultilingualNeural"
+    };
+  </script>
+  <script src="./directline.js" defer></script>
+  <script src="./speech.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
