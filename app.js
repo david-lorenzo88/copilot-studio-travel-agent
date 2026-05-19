@@ -26,7 +26,12 @@
   function addBubble(role, text) {
     const b = document.createElement("div");
     b.className = `bubble ${role}`;
-    b.textContent = text;
+    if (role === "bot" && looksLikeMarkdown(text)) {
+      b.classList.add("md");
+      b.innerHTML = mdToHtml(text);
+    } else {
+      b.textContent = text;
+    }
     chat.appendChild(b);
     chat.scrollTop = chat.scrollHeight;
     return b;
@@ -217,6 +222,19 @@
   const uiBridge = new UIEventBridge();
   const hotelMap = new HotelMap("hotelMap");
 
+  // ---------- Show map button (reopens the map after close) ----------
+
+  const showMapButton = document.getElementById("showMapButton");
+
+  // Reveal the button once the map has data to show
+  window.addEventListener("agent:hotels", () => {
+    if (showMapButton) showMapButton.classList.remove("hidden");
+  });
+
+  if (showMapButton) {
+    showMapButton.addEventListener("click", () => hotelMap.reopen());
+  }
+
   // ---------- DirectLine ----------
 
   const dl = new DirectLineClient({ tokenUrl: cfg.directLineTokenUrl });
@@ -300,7 +318,7 @@
       setPill(voiceStatus, "Speaking", "pill-ok");
     } else if (s === "idle") {
       setPill(voiceStatus, voiceMode ? "Voice on" : "Voice off",
-              voiceMode ? "pill-ok" : "pill-muted");
+        voiceMode ? "pill-ok" : "pill-muted");
     }
   });
 

@@ -136,6 +136,26 @@ class HotelMap {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
     }
+
+    /**
+ * Reopen the map panel without re-receiving the hotel data. Useful
+ * after a user has closed the map and wants to revisit the same
+ * search results. If no hotels have ever been plotted, does nothing.
+ */
+    reopen() {
+        if (this.markers.length === 0) return; // never had data — nothing to reopen
+        this.open();
+        // After the slide-in transition, tell Leaflet to recalculate its size
+        // and refit the bounds (same logic as the initial render).
+        setTimeout(() => {
+            if (!this.map) return;
+            this.map.invalidateSize();
+            if (this.markers.length > 1) {
+                const bounds = this.markers.map(m => m.getLatLng());
+                this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+            }
+        }, 360);
+    }
 }
 
 window.HotelMap = HotelMap;

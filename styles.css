@@ -37,9 +37,19 @@ body {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  max-width: 880px;
+  max-width: 1600px;       /* cap on truly massive monitors */
+  width: 80%;              /* 10% margin each side on most monitors */
   margin: 0 auto;
   padding: 0 16px;
+  min-height: 0;
+}
+
+/* On narrow viewports, expand back to full width */
+@media (max-width: 900px) {
+  .app {
+    width: 100%;
+    padding: 0 12px;
+  }
 }
 
 /* --- Top bar --- */
@@ -104,12 +114,24 @@ body {
 }
 
 /* --- Chat --- */
+/* Custom scrollbar for the chat (WebKit / Chromium + Firefox) */
 .chat {
-  padding: 18px 6px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.chat::-webkit-scrollbar {
+  width: 8px;
+}
+.chat::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  transition: background-color 200ms ease;
+}
+.chat::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255,255,255,0.22);
 }
 
 .bubble {
@@ -524,4 +546,100 @@ body {
     width: 100%;
     height: 50vh;
   }
+}
+
+/* Markdown rendering inside bot bubbles */
+.bubble.md {
+  line-height: 1.55;
+}
+.bubble.md h1, .bubble.md h2, .bubble.md h3, .bubble.md h4 {
+  margin: 14px 0 6px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: var(--text);
+}
+.bubble.md h1 { font-size: 18px; }
+.bubble.md h2 { font-size: 17px; }
+.bubble.md h3 { font-size: 15.5px; color: var(--accent); }
+.bubble.md h4 { font-size: 14.5px; color: var(--accent-2); }
+.bubble.md h1:first-child,
+.bubble.md h2:first-child,
+.bubble.md h3:first-child,
+.bubble.md h4:first-child {
+  margin-top: 0;
+}
+.bubble.md p {
+  margin: 6px 0;
+}
+.bubble.md ul, .bubble.md ol {
+  margin: 6px 0;
+  padding-left: 22px;
+}
+.bubble.md li {
+  margin: 2px 0;
+}
+.bubble.md strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.bubble.md em {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.bubble.md code {
+  background: rgba(255,255,255,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 12.5px;
+  color: var(--accent);
+}
+.bubble.md pre {
+  background: rgba(0,0,0,0.25);
+  padding: 10px 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.bubble.md pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+  font-size: 12.5px;
+}
+.bubble.md hr {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin: 12px 0;
+}
+.bubble.md a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.bubble.md blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  margin: 8px 0;
+  color: var(--text-muted);
+}
+.map-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(106, 167, 255, 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease, opacity 200ms ease;
+}
+.map-toggle:hover {
+  background: rgba(106, 167, 255, 0.22);
+  transform: scale(1.04);
+}
+.map-toggle.hidden {
+  display: none;
 }
