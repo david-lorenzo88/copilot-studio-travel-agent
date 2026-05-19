@@ -281,3 +281,45 @@ html, body {
   color: var(--err);
   border-color: rgba(255, 90, 95, 0.3);
 }
+/* ===== Hotel map ===== */
+.hotel-map {
+  height: 0;
+  margin: 0 4px 14px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: height 240ms ease-out;
+  background: var(--panel);
+}
+.hotel-map.visible {
+  height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Override Leaflet's default light theme to fit our dark UI */
+.hotel-map .leaflet-popup-content-wrapper,
+.hotel-map .leaflet-popup-tip {
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+}
+.hotel-map .leaflet-popup-content {
+  margin: 10px 14px;
+}
+.map-popup-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.map-popup-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.hotel-map .leaflet-container a {
+  color: var(--accent);
+}
+
+/* Slightly desaturate the OSM tiles to fit our dark theme */
+.hotel-map .leaflet-tile {
+  filter: grayscale(0.3) brightness(0.92);
+}

@@ -1,8 +1,10 @@
 /* ============================================================
    app.js
    Wires DirectLine, Azure Speech, and the chat UI.
-   Voice mode: tap mic to start a hands-free conversation loop.
-   Adaptive cards: handles connection-manager and similar cards.
+   - Voice mode: tap mic to start a hands-free conversation loop
+   - Adaptive cards: connection-manager and similar cards
+   - UI events: side-channel event activities routed to the bridge,
+     which dispatches DOM CustomEvents for components like HotelMap
    ============================================================ */
 
 (() => {
@@ -80,14 +82,6 @@
 
   // ---------- Adaptive card rendering ----------
 
-  /**
-   * Renders an Adaptive Card subset sufficient for Copilot Studio's
-   * connection-manager card and similar prompts. Supports:
-   * - TextBlock (with inline markdown links and basic wrapping)
-   * - Column / ColumnSet (rendered as a flex row)
-   * - ActionSet with Action.Submit / Action.OpenUrl buttons
-   * Returns the rendered element or null if not an adaptive card.
-   */
   function renderAdaptiveCard(activity) {
     const attachment = activity.attachments?.[0];
     if (!attachment || attachment.contentType !== "application/vnd.microsoft.card.adaptive") {
@@ -102,7 +96,6 @@
     if (Array.isArray(card.body)) {
       for (const item of card.body) renderAdaptiveItem(item, wrap);
     }
-    // Top-level actions (not in an ActionSet) — rare but possible
     if (Array.isArray(card.actions) && card.actions.length > 0) {
       renderActionSet({ actions: card.actions }, wrap);
     }
@@ -120,7 +113,6 @@
         const p = document.createElement("p");
         p.className = "ac-text";
         if (item.wrap !== false) p.style.whiteSpace = "normal";
-        // Minimal markdown: links [text](url) and line breaks
         p.innerHTML = markdownLite(item.text || "");
         parent.appendChild(p);
         break;
@@ -138,7 +130,6 @@
         const col = document.createElement("div");
         col.className = "ac-col";
         if (item.width && typeof item.width === "string") {
-          // Numeric strings like "40" → flex grow weight
           const n = parseFloat(item.width);
           if (!isNaN(n)) col.style.flex = String(n);
         }
@@ -162,7 +153,6 @@
         break;
       }
       default:
-        // Unknown type — silently skip
         console.debug("Unhandled adaptive item type:", item.type, item);
     }
   }
@@ -183,52 +173,34 @@
     parent.appendChild(row);
   }
 
-  /**
-   * Handle an Action.Submit or Action.OpenUrl from an adaptive card.
-   * Action.Submit sends the action's `data` object back to the bot.
-   * Action.OpenUrl opens a popup (so a sign-in or external page doesn't
-   * navigate us away from the chat).
-   */
   function handleAdaptiveAction(action, btn) {
     if (action.type === "Action.OpenUrl" && action.url) {
       window.open(action.url, "_blank", "noopener,noreferrer");
       return;
     }
-    // Default: Action.Submit
     const data = action.data || {};
     btn.disabled = true;
     btn.textContent = btn.textContent + "…";
 
-    // Show what the user "did" in the chat for clarity
     if (data.action) {
       addBubble("user", data.action);
     }
 
-    // Send via DirectLine. For connection-manager retry, the bot expects
-    // a message activity carrying `value` with the data.
     dl.sendValue(data).catch(err => {
       addMeta(`Action failed: ${err.message}`);
       btn.disabled = false;
     });
   }
 
-  /**
-   * Minimal markdown converter — handles [text](url) links and \n line breaks.
-   * Escapes HTML special characters first to avoid injection.
-   */
   function markdownLite(s) {
     const esc = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const linked = esc.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
-      // Open in popup so we don't navigate away from the chat
       const safeUrl = url.replace(/"/g, "&quot;");
       return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="ac-link">${label}</a>`;
     });
     return linked.replace(/\n/g, "<br>");
   }
 
-  /**
-   * Convert bot reply text into something Azure Speech can pronounce.
-   */
   function textForSpeech(raw) {
     if (!raw) return "";
     return raw
@@ -239,6 +211,11 @@
       .replace(/\s+/g, " ")
       .trim();
   }
+
+  // ---------- UI event bridge + components ----------
+
+  const uiBridge = new UIEventBridge();
+  const hotelMap = new HotelMap("hotelMap");
 
   // ---------- DirectLine ----------
 
@@ -251,9 +228,13 @@
 
   dl.addEventListener("activity", (e) => {
     const act = e.detail;
+
+    // Side-channel event activities go to the UI bridge and don't render in chat
+    if (uiBridge.processActivity(act)) return;
+
+    // Everything else is treated as a regular conversational activity
     if (act.type !== "message") return;
 
-    // Try renderers in order of specificity
     const adaptiveRendered = renderAdaptiveCard(act);
     const hotelRendered = adaptiveRendered ? null : renderHotelCards(act);
 
