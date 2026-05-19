@@ -37,14 +37,13 @@ body {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  max-width: 1600px;       /* cap on truly massive monitors */
-  width: 80%;              /* 10% margin each side on most monitors */
+  max-width: 1600px;
+  width: 80%;
   margin: 0 auto;
   padding: 0 16px;
   min-height: 0;
 }
 
-/* On narrow viewports, expand back to full width */
 @media (max-width: 900px) {
   .app {
     width: 100%;
@@ -84,6 +83,7 @@ body {
 .status-pills {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .pill {
@@ -113,27 +113,75 @@ body {
   border-color: rgba(255, 90, 95, 0.3);
 }
 
-/* --- Chat --- */
-/* Custom scrollbar for the chat (WebKit / Chromium + Firefox) */
-.chat {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.15) transparent;
+.map-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(106, 167, 255, 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease, opacity 200ms ease;
 }
+
+.map-toggle:hover {
+  background: rgba(106, 167, 255, 0.22);
+  transform: scale(1.04);
+}
+
+.map-toggle.hidden {
+  display: none;
+}
+
+/* ===== Layout: chat on left, map slides in on right ===== */
+
+.layout {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* --- Chat --- */
+.chat {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 6px;
+  transition: flex 320ms cubic-bezier(.4, 0, .2, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
 .chat::-webkit-scrollbar {
   width: 8px;
 }
+
 .chat::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .chat::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.12);
+  background-color: rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   transition: background-color 200ms ease;
 }
+
 .chat::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255,255,255,0.22);
+  background-color: rgba(255, 255, 255, 0.22);
 }
 
+/* --- Bubbles --- */
 .bubble {
   max-width: 78%;
   padding: 12px 14px;
@@ -167,6 +215,14 @@ body {
   padding: 4px 8px;
 }
 
+/* Typing indicator: borderless, transparent, no bubble background */
+.bubble.bot:has(.typing) {
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 0;
+  animation: none;
+}
+
 .typing {
   display: inline-flex;
   gap: 4px;
@@ -191,14 +247,10 @@ body {
 }
 
 @keyframes blink {
-
-  0%,
-  80%,
-  100% {
+  0%, 80%, 100% {
     opacity: 0.2;
     transform: translateY(0);
   }
-
   40% {
     opacity: 1.0;
     transform: translateY(-3px);
@@ -210,14 +262,13 @@ body {
     opacity: 0;
     transform: translateY(4px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* --- Adaptive card-ish hotel rendering --- */
+/* --- Hotel card list (non-markdown rendering) --- */
 .card-list {
   display: grid;
   gap: 10px;
@@ -314,6 +365,7 @@ body {
   background: var(--ok);
 }
 
+/* --- Auth button --- */
 .auth-button {
   margin-top: 10px;
   padding: 10px 18px;
@@ -337,7 +389,7 @@ body {
   cursor: default;
 }
 
-/* Adaptive card rendering */
+/* --- Adaptive card rendering --- */
 .bubble.adaptive {
   display: flex;
   flex-direction: column;
@@ -417,36 +469,122 @@ body {
   border-color: rgba(255, 90, 95, 0.3);
 }
 
-/* ===== Hotel map ===== */
-/* ===== Layout: chat on left, map slides in on right ===== */
-
-.app {
-  /* Existing app rules apply; we just adjust the grid to give layout area room */
+/* --- Markdown rendering inside bot bubbles --- */
+.bubble.md {
+  line-height: 1.5;
+  white-space: normal;
 }
 
-.layout {
-  display: flex;
-  flex-direction: row;
-  gap: 0;
-  min-height: 0;
-  /* let children control their own height */
-  flex: 1;
-  /* fill available vertical space */
-  overflow: hidden;
+.bubble.md > *:first-child {
+  margin-top: 0;
 }
 
-.chat {
-  flex: 1;
-  min-width: 0;
-  /* prevent overflow when narrowed */
-  transition: flex 320ms cubic-bezier(.4, 0, .2, 1);
+.bubble.md > *:last-child {
+  margin-bottom: 0;
 }
 
-/* The map panel: full height, slides in from the right */
+.bubble.md h1,
+.bubble.md h2,
+.bubble.md h3,
+.bubble.md h4 {
+  margin: 10px 0 4px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.bubble.md h1 { font-size: 18px; }
+.bubble.md h2 { font-size: 16.5px; }
+.bubble.md h3 { font-size: 15.5px; color: var(--accent); }
+.bubble.md h4 { font-size: 14.5px; color: var(--accent-2); }
+
+.bubble.md p {
+  margin: 4px 0;
+}
+
+.bubble.md ul,
+.bubble.md ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.bubble.md li {
+  margin: 1px 0;
+}
+
+.bubble.md li > p {
+  margin: 0;
+}
+
+.bubble.md li + li {
+  margin-top: 2px;
+}
+
+.bubble.md ul ul,
+.bubble.md ol ol,
+.bubble.md ul ol,
+.bubble.md ol ul {
+  margin: 2px 0;
+}
+
+.bubble.md strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.bubble.md em {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.bubble.md code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 12.5px;
+  color: var(--accent);
+}
+
+.bubble.md pre {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 10px 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.bubble.md pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.bubble.md hr {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.bubble.md a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.bubble.md blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  margin: 6px 0;
+  color: var(--text-muted);
+}
+
+/* ===== Hotel map panel ===== */
+
 .map-panel {
   position: relative;
   flex: 0 0 0;
-  /* hidden by default — zero width */
   width: 0;
   opacity: 0;
   overflow: hidden;
@@ -460,32 +598,22 @@ body {
 
 .map-panel.visible {
   flex: 0 0 50%;
-  /* takes half the layout width when open */
   width: 50%;
   opacity: 1;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* When map is visible, chat narrows but stays usable */
-.layout.map-open .chat {
-  flex: 1;
-  /* still flexible but now sharing space */
-}
-
-/* The actual Leaflet map fills the panel */
 .hotel-map {
   width: 100%;
   height: 100%;
   background: var(--panel);
 }
 
-/* Close button */
 .map-close {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 500;
-  /* above Leaflet's zoom controls (which are z-index 400) */
   display: inline-grid;
   place-items: center;
   width: 32px;
@@ -504,7 +632,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Popup styling (unchanged from before) */
 .hotel-map .leaflet-popup-content-wrapper,
 .hotel-map .leaflet-popup-tip {
   background: var(--panel-2);
@@ -535,111 +662,13 @@ body {
   filter: grayscale(0.3) brightness(0.92);
 }
 
-/* On narrow viewports, fall back to stacked layout */
 @media (max-width: 720px) {
   .layout {
     flex-direction: column;
   }
-
   .map-panel.visible {
     flex: 0 0 50%;
     width: 100%;
     height: 50vh;
   }
-}
-
-/* Markdown rendering inside bot bubbles */
-.bubble.md {
-  line-height: 1.55;
-}
-.bubble.md h1, .bubble.md h2, .bubble.md h3, .bubble.md h4 {
-  margin: 14px 0 6px;
-  font-weight: 600;
-  letter-spacing: 0.1px;
-  color: var(--text);
-}
-.bubble.md h1 { font-size: 18px; }
-.bubble.md h2 { font-size: 17px; }
-.bubble.md h3 { font-size: 15.5px; color: var(--accent); }
-.bubble.md h4 { font-size: 14.5px; color: var(--accent-2); }
-.bubble.md h1:first-child,
-.bubble.md h2:first-child,
-.bubble.md h3:first-child,
-.bubble.md h4:first-child {
-  margin-top: 0;
-}
-.bubble.md p {
-  margin: 6px 0;
-}
-.bubble.md ul, .bubble.md ol {
-  margin: 6px 0;
-  padding-left: 22px;
-}
-.bubble.md li {
-  margin: 2px 0;
-}
-.bubble.md strong {
-  color: var(--text);
-  font-weight: 600;
-}
-.bubble.md em {
-  color: var(--text-muted);
-  font-style: italic;
-}
-.bubble.md code {
-  background: rgba(255,255,255,0.08);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
-  font-size: 12.5px;
-  color: var(--accent);
-}
-.bubble.md pre {
-  background: rgba(0,0,0,0.25);
-  padding: 10px 12px;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 8px 0;
-}
-.bubble.md pre code {
-  background: transparent;
-  padding: 0;
-  color: var(--text);
-  font-size: 12.5px;
-}
-.bubble.md hr {
-  border: 0;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin: 12px 0;
-}
-.bubble.md a {
-  color: var(--accent);
-  text-decoration: underline;
-}
-.bubble.md blockquote {
-  border-left: 3px solid var(--accent);
-  padding-left: 10px;
-  margin: 8px 0;
-  color: var(--text-muted);
-}
-.map-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px 4px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(106, 167, 255, 0.12);
-  color: var(--accent);
-  cursor: pointer;
-  transition: background 120ms ease, transform 80ms ease, opacity 200ms ease;
-}
-.map-toggle:hover {
-  background: rgba(106, 167, 255, 0.22);
-  transform: scale(1.04);
-}
-.map-toggle.hidden {
-  display: none;
 }
