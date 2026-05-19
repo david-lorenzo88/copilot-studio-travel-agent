@@ -1,10 +1,12 @@
 /* ============================================================
    app.js
-   Wires DirectLine, Azure Speech, and the chat UI.
+   Wires DirectLine, Azure Speech, side panels, and the chat UI.
    - Voice mode: tap mic to start a hands-free conversation loop
    - Adaptive cards: connection-manager and similar cards
    - UI events: side-channel event activities routed to the bridge,
-     which dispatches DOM CustomEvents for components like HotelMap
+     which dispatches DOM CustomEvents for components (HotelMap,
+     ReservationPanel, future widgets)
+   - Markdown rendering for agent replies that look like markdown
    ============================================================ */
 
 (() => {
@@ -217,23 +219,28 @@
       .trim();
   }
 
-  // ---------- UI event bridge + components ----------
+  // ---------- UI event bridge + Dataverse + side panels ----------
 
   const uiBridge = new UIEventBridge();
-  const hotelMap = new HotelMap("hotelMap");
+  const dataverse = new DataverseClient();
 
-  // ---------- Show map button (reopens the map after close) ----------
+  // Panel switcher manages which side panel is visible at any time
+  const panelSwitcher = new PanelSwitcher([
+    { key: "map", panelId: "mapPanel", toggleId: "showMapButton" },
+    { key: "reservation", panelId: "reservationPanel", toggleId: "showReservationButton" }
+  ]);
 
-  const showMapButton = document.getElementById("showMapButton");
+  const hotelMap = new HotelMap("hotelMap", "mapPanel", panelSwitcher);
+  const reservationPanel = new ReservationPanel(
+    "reservationContent",
+    "reservationPanel",
+    dataverse,
+    panelSwitcher
+  );
 
-  // Reveal the button once the map has data to show
-  window.addEventListener("agent:hotels", () => {
-    if (showMapButton) showMapButton.classList.remove("hidden");
-  });
-
-  if (showMapButton) {
-    showMapButton.addEventListener("click", () => hotelMap.reopen());
-  }
+  // Reveal the Map toggle in the topbar after hotels arrive for the first time
+  window.addEventListener("agent:hotels", () => panelSwitcher.notifyAvailable("map"));
+  // The reservation toggle is revealed from inside ReservationPanel after a successful fetch.
 
   // ---------- DirectLine ----------
 
@@ -318,7 +325,7 @@
       setPill(voiceStatus, "Speaking", "pill-ok");
     } else if (s === "idle") {
       setPill(voiceStatus, voiceMode ? "Voice on" : "Voice off",
-        voiceMode ? "pill-ok" : "pill-muted");
+              voiceMode ? "pill-ok" : "pill-muted");
     }
   });
 

@@ -672,3 +672,317 @@ body {
     height: 50vh;
   }
 }
+
+/* ===== Unified side-panel styling ===== */
+
+.side-panel {
+  position: relative;
+  flex: 0 0 0;
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-left: 1px solid transparent;
+  transition:
+    flex-basis 320ms cubic-bezier(.4, 0, .2, 1),
+    width 320ms cubic-bezier(.4, 0, .2, 1),
+    opacity 220ms ease-out 100ms,
+    border-color 320ms ease-out;
+}
+
+.side-panel.visible {
+  flex: 0 0 50%;
+  width: 50%;
+  opacity: 1;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 500;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(11, 18, 32, 0.85);
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 120ms ease, transform 80ms ease;
+}
+
+.panel-close:hover {
+  background: rgba(11, 18, 32, 0.95);
+  transform: scale(1.05);
+}
+
+/* Unified panel toggles in the topbar */
+.panel-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(106, 167, 255, 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease, opacity 200ms ease;
+}
+
+.panel-toggle:hover {
+  background: rgba(106, 167, 255, 0.22);
+  transform: scale(1.04);
+}
+
+.panel-toggle.hidden {
+  display: none;
+}
+
+.panel-toggle.active {
+  background: var(--accent);
+  color: #0b1220;
+  border-color: var(--accent);
+}
+
+/* ===== Reservation panel ===== */
+
+.reservation-panel {
+  background: var(--panel);
+}
+
+.reservation-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.reservation-content::-webkit-scrollbar {
+  width: 8px;
+}
+.reservation-content::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.12);
+  border-radius: 8px;
+}
+
+/* Loading and error states */
+.rp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+.rp-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.08);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: rp-spin 720ms linear infinite;
+}
+.rp-loading-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+@keyframes rp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.rp-error {
+  padding: 24px;
+  background: rgba(255, 90, 95, 0.08);
+  border: 1px solid rgba(255, 90, 95, 0.2);
+  border-radius: var(--radius);
+  color: var(--err);
+}
+.rp-error-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.rp-error-message {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Main content */
+.rp {
+  animation: fade-up 240ms ease-out;
+}
+
+.rp-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  gap: 4px 12px;
+  align-items: baseline;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 22px;
+}
+.rp-status-badge {
+  grid-column: 1;
+  grid-row: 1;
+  display: inline-block;
+  width: fit-content;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.18);
+  color: var(--ok);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+.rp-code {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.rp-total {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.rp-total-label {
+  grid-column: 2;
+  grid-row: 3;
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.rp-section {
+  margin-bottom: 22px;
+}
+.rp-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+/* Guest */
+.rp-guest {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.rp-avatar {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1220;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.5px;
+}
+.rp-guest-info {
+  flex: 1;
+}
+.rp-guest-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+.rp-guest-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.rp-loyalty {
+  color: var(--accent-2);
+}
+
+/* Hotel */
+.rp-hotel-name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.rp-stars {
+  color: var(--warn);
+  margin-left: 4px;
+}
+.rp-hotel-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 2px 0;
+}
+.rp-hotel-desc {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.rp-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.rp-amenity {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(106, 167, 255, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(106, 167, 255, 0.2);
+}
+
+/* Rows */
+.rp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.rp-row:last-child {
+  border-bottom: 0;
+}
+.rp-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.rp-value {
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+}
+.rp-row-block {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.rp-row-block .rp-value {
+  text-align: left;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.rp-requests {
+  font-style: italic;
+  color: var(--text-muted);
+}
