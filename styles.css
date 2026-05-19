@@ -20,9 +20,12 @@
   --radius-sm: 10px;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   height: 100%;
   font-family: "Segoe UI", -apple-system, system-ui, "Inter", sans-serif;
@@ -45,8 +48,9 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 18px 4px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+
 .brand {
   display: flex;
   align-items: center;
@@ -55,6 +59,7 @@ html, body {
   font-size: 18px;
   letter-spacing: 0.2px;
 }
+
 .brand-mark {
   display: inline-grid;
   place-items: center;
@@ -65,18 +70,38 @@ html, body {
   color: #0b1220;
   font-weight: 700;
 }
-.status-pills { display: flex; gap: 8px; }
+
+.status-pills {
+  display: flex;
+  gap: 8px;
+}
+
 .pill {
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
-.pill-ok   { background: rgba(52,199,89,0.15);  color: var(--ok);   border-color: rgba(52,199,89,0.3); }
-.pill-warn { background: rgba(255,176,32,0.15); color: var(--warn); border-color: rgba(255,176,32,0.3); }
-.pill-err  { background: rgba(255,90,95,0.15);  color: var(--err);  border-color: rgba(255,90,95,0.3); }
+
+.pill-ok {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--ok);
+  border-color: rgba(52, 199, 89, 0.3);
+}
+
+.pill-warn {
+  background: rgba(255, 176, 32, 0.15);
+  color: var(--warn);
+  border-color: rgba(255, 176, 32, 0.3);
+}
+
+.pill-err {
+  background: rgba(255, 90, 95, 0.15);
+  color: var(--err);
+  border-color: rgba(255, 90, 95, 0.3);
+}
 
 /* --- Chat --- */
 .chat {
@@ -86,6 +111,7 @@ html, body {
   flex-direction: column;
   gap: 14px;
 }
+
 .bubble {
   max-width: 78%;
   padding: 12px 14px;
@@ -96,17 +122,20 @@ html, body {
   word-wrap: break-word;
   animation: fade-up 180ms ease-out;
 }
+
 .bubble.user {
   align-self: flex-end;
   background: var(--user);
   color: white;
   border-bottom-right-radius: 4px;
 }
+
 .bubble.bot {
   align-self: flex-start;
   background: var(--bot);
   border-bottom-left-radius: 4px;
 }
+
 .bubble.meta {
   align-self: center;
   background: transparent;
@@ -115,57 +144,108 @@ html, body {
   font-style: italic;
   padding: 4px 8px;
 }
-.typing { display: inline-flex; gap: 4px; align-items: center; height: 16px; }
+
+.typing {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  height: 16px;
+}
+
 .typing span {
-  width: 6px; height: 6px; border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: var(--text-muted);
   animation: blink 1.2s infinite ease-in-out;
 }
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes blink {
-  0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
-  40%           { opacity: 1.0; transform: translateY(-3px); }
+
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 1.0;
+    transform: translateY(-3px);
+  }
 }
+
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Adaptive card-ish hotel rendering --- */
-.card-list { display: grid; gap: 10px; margin-top: 8px; }
+.card-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
 .card {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 4px 12px;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.card .name { font-weight: 600; }
-.card .meta { font-size: 12px; color: var(--text-muted); }
-.card .price { font-weight: 600; color: var(--accent); }
+
+.card .name {
+  font-weight: 600;
+}
+
+.card .meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.card .price {
+  font-weight: 600;
+  color: var(--accent);
+}
 
 /* --- Composer --- */
 .composer {
   display: flex;
   gap: 10px;
   padding: 14px 4px 22px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   align-items: center;
 }
+
 .compose {
   flex: 1;
   display: flex;
   gap: 8px;
   background: var(--panel);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   padding: 4px 4px 4px 16px;
   align-items: center;
 }
+
 .compose input {
   flex: 1;
   background: transparent;
@@ -175,9 +255,13 @@ html, body {
   padding: 10px 0;
   outline: none;
 }
-.compose input::placeholder { color: var(--text-muted); }
 
-.send, .mic {
+.compose input::placeholder {
+  color: var(--text-muted);
+}
+
+.send,
+.mic {
   display: inline-grid;
   place-items: center;
   width: 42px;
@@ -189,10 +273,24 @@ html, body {
   background: var(--user);
   transition: transform 80ms ease, background 120ms ease;
 }
-.send:hover, .mic:hover { transform: scale(1.04); }
-.mic { background: var(--accent-2); }
-.mic.listening { background: var(--err); box-shadow: 0 0 0 8px rgba(255,90,95,0.15); }
-.mic.speaking  { background: var(--ok); }
+
+.send:hover,
+.mic:hover {
+  transform: scale(1.04);
+}
+
+.mic {
+  background: var(--accent-2);
+}
+
+.mic.listening {
+  background: var(--err);
+  box-shadow: 0 0 0 8px rgba(255, 90, 95, 0.15);
+}
+
+.mic.speaking {
+  background: var(--ok);
+}
 
 .auth-button {
   margin-top: 10px;
@@ -206,50 +304,60 @@ html, body {
   cursor: pointer;
   transition: background 120ms ease, transform 80ms ease;
 }
+
 .auth-button:hover:not(:disabled) {
   background: var(--accent-2);
   transform: scale(1.02);
 }
+
 .auth-button:disabled {
   opacity: 0.6;
   cursor: default;
 }
+
 /* Adaptive card rendering */
 .bubble.adaptive {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .bubble.adaptive .ac-text {
   margin: 0;
   font-size: 14px;
   line-height: 1.4;
 }
+
 .bubble.adaptive .ac-link {
   color: var(--accent);
   text-decoration: underline;
 }
+
 .bubble.adaptive .ac-row {
   display: flex;
   gap: 8px;
   align-items: stretch;
 }
+
 .bubble.adaptive .ac-col {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .bubble.adaptive .ac-container {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .bubble.adaptive .ac-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 4px;
 }
+
 .bubble.adaptive .ac-button {
   padding: 8px 14px;
   background: rgba(255, 255, 255, 0.08);
@@ -261,54 +369,136 @@ html, body {
   cursor: pointer;
   transition: background 120ms ease, transform 80ms ease;
 }
+
 .bubble.adaptive .ac-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
 }
+
 .bubble.adaptive .ac-button:disabled {
   opacity: 0.6;
   cursor: default;
 }
+
 .bubble.adaptive .ac-button-positive {
   background: var(--accent);
   color: #0b1220;
   border-color: var(--accent);
 }
+
 .bubble.adaptive .ac-button-positive:hover:not(:disabled) {
   background: var(--accent-2);
 }
+
 .bubble.adaptive .ac-button-destructive {
   background: rgba(255, 90, 95, 0.15);
   color: var(--err);
   border-color: rgba(255, 90, 95, 0.3);
 }
+
 /* ===== Hotel map ===== */
-.hotel-map {
-  height: 0;
-  margin: 0 4px 14px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: height 240ms ease-out;
-  background: var(--panel);
-}
-.hotel-map.visible {
-  height: 320px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ===== Layout: chat on left, map slides in on right ===== */
+
+.app {
+  /* Existing app rules apply; we just adjust the grid to give layout area room */
 }
 
-/* Override Leaflet's default light theme to fit our dark UI */
+.layout {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  min-height: 0;
+  /* let children control their own height */
+  flex: 1;
+  /* fill available vertical space */
+  overflow: hidden;
+}
+
+.chat {
+  flex: 1;
+  min-width: 0;
+  /* prevent overflow when narrowed */
+  transition: flex 320ms cubic-bezier(.4, 0, .2, 1);
+}
+
+/* The map panel: full height, slides in from the right */
+.map-panel {
+  position: relative;
+  flex: 0 0 0;
+  /* hidden by default — zero width */
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-left: 1px solid transparent;
+  transition:
+    flex-basis 320ms cubic-bezier(.4, 0, .2, 1),
+    width 320ms cubic-bezier(.4, 0, .2, 1),
+    opacity 220ms ease-out 100ms,
+    border-color 320ms ease-out;
+}
+
+.map-panel.visible {
+  flex: 0 0 50%;
+  /* takes half the layout width when open */
+  width: 50%;
+  opacity: 1;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* When map is visible, chat narrows but stays usable */
+.layout.map-open .chat {
+  flex: 1;
+  /* still flexible but now sharing space */
+}
+
+/* The actual Leaflet map fills the panel */
+.hotel-map {
+  width: 100%;
+  height: 100%;
+  background: var(--panel);
+}
+
+/* Close button */
+.map-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 500;
+  /* above Leaflet's zoom controls (which are z-index 400) */
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(11, 18, 32, 0.85);
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 120ms ease, transform 80ms ease;
+}
+
+.map-close:hover {
+  background: rgba(11, 18, 32, 0.95);
+  transform: scale(1.05);
+}
+
+/* Popup styling (unchanged from before) */
 .hotel-map .leaflet-popup-content-wrapper,
 .hotel-map .leaflet-popup-tip {
   background: var(--panel-2);
   color: var(--text);
   border-radius: var(--radius-sm);
 }
+
 .hotel-map .leaflet-popup-content {
   margin: 10px 14px;
 }
+
 .map-popup-name {
   font-weight: 600;
   font-size: 14px;
 }
+
 .map-popup-meta {
   font-size: 12px;
   color: var(--text-muted);
@@ -319,7 +509,19 @@ html, body {
   color: var(--accent);
 }
 
-/* Slightly desaturate the OSM tiles to fit our dark theme */
 .hotel-map .leaflet-tile {
   filter: grayscale(0.3) brightness(0.92);
+}
+
+/* On narrow viewports, fall back to stacked layout */
+@media (max-width: 720px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .map-panel.visible {
+    flex: 0 0 50%;
+    width: 100%;
+    height: 50vh;
+  }
 }
