@@ -79,25 +79,29 @@ module.exports = async function (context, req) {
     const q = await qResp.json();
 
     // 2) The days for this quotation, sorted
-    const daysResp = await fetch(
-      `${dvUrl}/api/data/v9.2/tra_quotationdays` +
-      `?$filter=_tra_quotation_value eq ${id}` +
-      `&$orderby=tra_daynumber asc`,
-      { headers }
-    );
-    const daysData = daysResp.ok ? await daysResp.json() : { value: [] };
+    const daysUrl = `${dvUrl}/api/data/v9.2/tra_quotationdaies` +   // <-- daies, not days
+    `?$filter=_tra_quotation_value eq ${quotationGuid}` +
+    `&$orderby=tra_daynumber asc`;
+    const daysResp = await fetch(daysUrl, { headers });
+    if (!daysResp.ok) {
+        const detail = await daysResp.text();
+        context.log.error("Days fetch failed", daysResp.status, detail);
+        context.res = { status: 200, body: { ...shaped, days: [], _daysError: detail } };
+        return;
+    }
+    const daysData = await daysResp.json();
     const days = daysData.value || [];
 
     // 3) Activities per day (one call each — few days, negligible)
     const dayObjects = [];
     for (const d of days) {
       const dayId = d.tra_quotationdayid;
-      const actResp = await fetch(
+        const actResp = await fetch(
         `${dvUrl}/api/data/v9.2/tra_quotationactivities` +
         `?$filter=_tra_quotationday_value eq ${dayId}` +
         `&$orderby=tra_starttime asc`,
         { headers }
-      );
+        );
       const actData = actResp.ok ? await actResp.json() : { value: [] };
       const activities = (actData.value || []).map(a => ({
         name: a.tra_name,
