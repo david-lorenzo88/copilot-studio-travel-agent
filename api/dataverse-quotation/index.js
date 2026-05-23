@@ -77,6 +77,7 @@ module.exports = async function (context, req) {
       return;
     }
     const q = await qResp.json();
+    const quotationGuid = q.tra_quotationid;
 
     // 2) The days for this quotation, sorted
     const daysUrl = `${dvUrl}/api/data/v9.2/tra_quotationdaies` +   // <-- daies, not days
