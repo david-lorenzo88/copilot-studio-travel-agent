@@ -258,16 +258,9 @@
     // Everything else is treated as a regular conversational activity
     if (act.type !== "message") return;
 
-    if (isInternalJsonPayload(act.text)) {
-      // Internal data meant for flows/panels, not for the user to read.
-      // Clean up the typing indicator and resolve any pending reply so the
-      // conversation loop doesn't hang waiting on this turn.
+    if (isInternalJsonPayload(act)) {   // pass the whole activity now
       if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
-      if (pendingReply) {
-        const r = pendingReply;
-        pendingReply = null;
-        r(""); // resolve with empty so voice mode doesn't try to speak JSON
-      }
+      if (pendingReply) { const r = pendingReply; pendingReply = null; r(""); }
       return;
     }
 

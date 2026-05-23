@@ -36,35 +36,28 @@
    * Kept deliberately strict so normal messages that merely contain a brace
    * are never suppressed.
    */
-  function isInternalJsonPayload(text) {
+  function isInternalJsonPayload(act) {
+    // Never suppress activities that carry cards/attachments — those are
+    // sign-in cards, adaptive cards, hotel cards, etc.
+    if (act.attachments && act.attachments.length > 0) return false;
+
+    const text = act.text;
     if (!text) return false;
 
-    // Strip optional code fences the model sometimes adds
     let trimmed = text.trim()
       .replace(/^```(?:json)?\s*/i, "")
       .replace(/```$/i, "")
       .trim();
 
-    // Must look like a JSON object or array to be worth parsing
     if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) return false;
 
     let parsed;
-    try {
-      parsed = JSON.parse(trimmed);
-    } catch {
-      return false; // not valid JSON → it's just prose, render normally
-    }
+  try { parsed = JSON.parse(trimmed); }
+  catch { return false; }
 
-    // Match the structured payloads we want to hide.
-    // Itinerary contract: an object with a "days" array.
-    if (parsed && Array.isArray(parsed.days)) return true;
-
-    // Defensive extras — uncomment/extend if other internal payloads leak:
-    // if (parsed && Array.isArray(parsed.hotels)) return true;
-    // if (parsed && parsed.confirmationCode && parsed.status) return true;
-
-    return false;
-  }
+  // Only suppress the itinerary contract specifically
+  return parsed && Array.isArray(parsed.days);
+}
 
   /**
    * Convert a markdown string to safe HTML.
