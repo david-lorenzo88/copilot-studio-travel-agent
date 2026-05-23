@@ -57,6 +57,51 @@
     return b;
   }
 
+  /**
+   * Renders an OAuth card (application/vnd.microsoft.card.oauth) — the sign-in
+   * prompt with a login button. The login URL lives in content.buttons[].value.
+   */
+  function renderOAuthCard(activity) {
+    const att = activity.attachments?.[0];
+    if (!att || att.contentType !== "application/vnd.microsoft.card.oauth") return null;
+
+    const content = att.content || {};
+    const promptText = content.text || "Please sign in to continue.";
+    const buttons = content.buttons || [];
+
+    const wrap = document.createElement("div");
+    wrap.className = "bubble bot adaptive";
+
+    const p = document.createElement("p");
+    p.className = "ac-text";
+    p.textContent = promptText;
+    wrap.appendChild(p);
+
+    const actions = document.createElement("div");
+    actions.className = "ac-actions";
+
+    for (const btn of buttons) {
+      const a = document.createElement("button");
+      a.className = "ac-button ac-button-positive";
+      a.textContent = btn.title || "Sign in";
+      // OAuth card buttons use type 6 (signin); the URL is in btn.value
+      a.addEventListener("click", () => {
+        const url = btn.value || btn.url;
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer", "width=600,height=700");
+        } else {
+          console.warn("OAuth button has no URL", btn);
+        }
+      });
+      actions.appendChild(a);
+    }
+
+    wrap.appendChild(actions);
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
   function renderHotelCards(activity) {
     const value = activity.value || activity.attachments?.[0]?.content?.body;
     if (!value || !Array.isArray(value.hotels)) return null;
@@ -265,9 +310,10 @@
     }
 
     const adaptiveRendered = renderAdaptiveCard(act);
+    const oauthRendered = adaptiveRendered ? null : renderOAuthCard(act);
     const hotelRendered = adaptiveRendered ? null : renderHotelCards(act);
 
-    if (!adaptiveRendered && !hotelRendered) {
+    if (!adaptiveRendered && !oauthRendered && !hotelRendered) {
       if (act.text) {
         addBubble("bot", act.text);
       } else if (act.speak) {
