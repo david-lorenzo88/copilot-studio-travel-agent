@@ -31,32 +31,61 @@
   }
 
   /**
-   * Detects raw JSON payloads that are meant for internal use (itinerary data,
-   * structured agent output) and should not be rendered as a chat bubble.
-   * Kept deliberately strict so normal messages that merely contain a brace
-   * are never suppressed.
-   */
-  function isInternalJsonPayload(act) {
-    // Never suppress activities that carry cards/attachments — those are
-    // sign-in cards, adaptive cards, hotel cards, etc.
-    if (act.attachments && act.attachments.length > 0) return false;
+ * Removes an embedded itinerary JSON object from a message, returning the
+ * cleaned prose. Handles three cases:
+ *   - whole message is JSON  -> returns "" (nothing to show)
+ *   - prose + trailing JSON  -> returns just the prose
+ *   - no itinerary JSON      -> returns the text unchanged
+ */
+function stripItineraryJson(text) {
+  if (!text) return text;
 
-    const text = act.text;
-    if (!text) return false;
+  // Find the first '{' that begins a JSON object containing "days"
+  const firstBrace = text.indexOf("{");
+  if (firstBrace === -1) return text;
 
-    let trimmed = text.trim()
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/```$/i, "")
-      .trim();
+  // Try to extract a balanced {...} starting at firstBrace
+  const candidate = extractBalancedObject(text, firstBrace);
+  if (!candidate) return text;
 
-    if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) return false;
+  // Confirm it's the itinerary contract before stripping
+  let parsed;
+  try {
+    parsed = JSON.parse(candidate);
+  } catch {
+    return text;
+  }
+  if (!parsed || !Array.isArray(parsed.days)) return text;
 
-    let parsed;
-  try { parsed = JSON.parse(trimmed); }
-  catch { return false; }
+  // Remove the JSON, keep surrounding prose
+  const before = text.slice(0, firstBrace);
+  const after = text.slice(firstBrace + candidate.length);
+  const cleaned = (before + after).trim();
+  return cleaned;
+}
 
-  // Only suppress the itinerary contract specifically
-  return parsed && Array.isArray(parsed.days);
+/**
+ * Extracts a balanced {...} substring starting at index `start`.
+ * Respects strings and escapes so braces inside string values don't fool it.
+ * Returns the substring or null if no balanced object is found.
+ */
+function extractBalancedObject(text, start) {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (escaped) { escaped = false; continue; }
+    if (ch === "\\") { escaped = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null; // never balanced
 }
 
   /**
@@ -244,5 +273,5 @@
 
   window.mdToHtml = mdToHtml;
   window.looksLikeMarkdown = looksLikeMarkdown;
-  window.isInternalJsonPayload = isInternalJsonPayload;
+  window.stripItineraryJson = stripItineraryJson;
 })();

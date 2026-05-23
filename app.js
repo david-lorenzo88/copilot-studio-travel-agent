@@ -303,11 +303,16 @@
     // Everything else is treated as a regular conversational activity
     if (act.type !== "message") return;
 
-    if (isInternalJsonPayload(act)) {   // pass the whole activity now
+    // Strip any embedded itinerary JSON; keep surrounding prose
+    const cleanedText = stripItineraryJson(act.text);
+
+    // If stripping removed everything (message was pure JSON), suppress entirely
+    if (act.text && !cleanedText && (!act.attachments || act.attachments.length === 0)) {
       if (pendingTyping) { pendingTyping.remove(); pendingTyping = null; }
       if (pendingReply) { const r = pendingReply; pendingReply = null; r(""); }
       return;
     }
+
 
     const adaptiveRendered = renderAdaptiveCard(act);
     const oauthRendered = adaptiveRendered ? null : renderOAuthCard(act);
