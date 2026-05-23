@@ -986,3 +986,70 @@ body {
   font-style: italic;
   color: var(--text-muted);
 }
+/* ===== Quotation panel ===== */
+.quotation-panel { background: var(--panel); }
+.quotation-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 26px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.quotation-content::-webkit-scrollbar { width: 8px; }
+.quotation-content::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.12); border-radius: 8px; }
+
+.qp-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:14px; }
+.qp-spinner { width:34px; height:34px; border:3px solid rgba(255,255,255,0.08); border-top-color: var(--accent); border-radius:50%; animation: qp-spin 720ms linear infinite; }
+.qp-loading-text { color: var(--text-muted); font-size:13px; }
+@keyframes qp-spin { to { transform: rotate(360deg); } }
+
+.qp-error { padding:20px; background:rgba(255,90,95,0.08); border:1px solid rgba(255,90,95,0.2); border-radius:var(--radius); color:var(--err); }
+.qp-error-title { font-weight:600; margin-bottom:6px; }
+.qp-error-message { font-size:13px; color:var(--text-muted); }
+
+.qp { animation: fade-up 240ms ease-out; }
+
+.qp-header {
+  display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto;
+  gap:2px 12px; align-items:baseline;
+  padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:20px;
+}
+.qp-status { grid-column:1; grid-row:1; width:fit-content; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; padding:3px 10px; border-radius:999px; background:rgba(106,167,255,0.16); color:var(--accent); border:1px solid rgba(106,167,255,0.3); }
+.qp-number { grid-column:1; grid-row:2; font-size:24px; font-weight:700; letter-spacing:-.3px; }
+.qp-total { grid-column:2; grid-row:1 / span 2; align-self:center; font-size:30px; font-weight:700; color:var(--accent); letter-spacing:-.5px; line-height:1; }
+.qp-total-label { grid-column:2; grid-row:2; text-align:right; font-size:11px; color:var(--text-muted); }
+
+.qp-section { margin-bottom:20px; }
+.qp-section-title { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin:0 0 8px; }
+
+.qp-row { display:flex; justify-content:space-between; align-items:baseline; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.qp-row:last-child { border-bottom:0; }
+.qp-label { font-size:13px; color:var(--text-muted); }
+.qp-value { font-size:13.5px; font-weight:500; text-align:right; }
+.qp-grand { margin-top:6px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.12); border-bottom:0; }
+.qp-grand .qp-label, .qp-grand .qp-value { font-size:15px; font-weight:700; color:var(--text); }
+.qp-grand .qp-value { color:var(--accent); }
+
+.qp-hotel-name { font-weight:600; font-size:15px; }
+.qp-stars { color:var(--warn); margin-left:4px; }
+.qp-muted { font-size:13px; color:var(--text-muted); margin-top:2px; }
+.qp-pending { margin-top:14px; font-style:italic; }
+
+.qp-day { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; }
+.qp-day-head { display:flex; justify-content:space-between; align-items:baseline; }
+.qp-day-title { font-weight:600; font-size:14px; }
+.qp-day-total { font-size:12px; font-weight:600; color:var(--accent); }
+.qp-day-weather { font-size:12px; color:var(--text-muted); margin:2px 0 8px; }
+.qp-slot { font-size:13px; margin:3px 0; }
+.qp-slot-label { font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:var(--accent-2); margin-right:6px; }
+.qp-act-table { width:100%; margin-top:8px; border-collapse:collapse; }
+.qp-act-table td { font-size:12.5px; padding:4px 6px; border-top:1px solid rgba(255,255,255,0.05); color:var(--text); }
+.qp-act-cost { text-align:right; color:var(--accent); white-space:nowrap; }
+
+.qp-download {
+  display:block; text-align:center; margin-top:8px; padding:12px 18px;
+  background:var(--accent); color:#0b1220; border-radius:10px;
+  font-weight:600; font-size:14px; text-decoration:none;
+  transition: background 120ms ease, transform 80ms ease;
+}
+.qp-download:hover { background:var(--accent-2); transform:scale(1.02); }

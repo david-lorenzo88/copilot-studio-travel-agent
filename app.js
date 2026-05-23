@@ -224,19 +224,17 @@
   const uiBridge = new UIEventBridge();
   const dataverse = new DataverseClient();
 
-  // Panel switcher manages which side panel is visible at any time
+  
+
   const panelSwitcher = new PanelSwitcher([
     { key: "map", panelId: "mapPanel", toggleId: "showMapButton" },
-    { key: "reservation", panelId: "reservationPanel", toggleId: "showReservationButton" }
+    { key: "reservation", panelId: "reservationPanel", toggleId: "showReservationButton" },
+    { key: "quotation", panelId: "quotationPanel", toggleId: "showQuotationButton" }
   ]);
 
   const hotelMap = new HotelMap("hotelMap", "mapPanel", panelSwitcher);
-  const reservationPanel = new ReservationPanel(
-    "reservationContent",
-    "reservationPanel",
-    dataverse,
-    panelSwitcher
-  );
+  const reservationPanel = new ReservationPanel("reservationContent", "reservationPanel", dataverse, panelSwitcher);
+  const quotationPanel = new QuotationPanel("quotationContent", "quotationPanel", dataverse, panelSwitcher);
 
   // Reveal the Map toggle in the topbar after hotels arrive for the first time
   window.addEventListener("agent:hotels", () => panelSwitcher.notifyAvailable("map"));

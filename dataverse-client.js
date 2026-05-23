@@ -12,6 +12,15 @@ class DataverseClient {
   }
 
   /**
+   * Fetch a full quotation by id — header, hotel, flights, and the
+   * day-by-day itinerary with activities.
+   */
+  async getQuotation(quotationId) {
+    if (!quotationId) throw new Error("quotationId required");
+    return await this._call(`/quotation/${encodeURIComponent(quotationId)}`);
+  }
+
+  /**
    * Fetch a single reservation by confirmation code with all related
    * data expanded (guest, hotel, room, city).
    */
