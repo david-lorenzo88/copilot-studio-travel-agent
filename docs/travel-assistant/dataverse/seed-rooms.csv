@@ -1,0 +1,73 @@
+tra_name,tra_hotel_name,tra_type,tra_capacity,tra_pricepernight,tra_quantityavailable
+Classic Single,Hotel Artemide,Single,1,180,8
+Superior Double,Hotel Artemide,Double,2,260,12
+Deluxe Twin,Hotel Artemide,Twin,2,280,6
+Junior Suite,Hotel Artemide,Suite,3,420,4
+Classic Double,Hotel de Russie,Double,2,720,10
+Deluxe Suite,Hotel de Russie,Suite,3,1450,6
+Nijinsky Suite,Hotel de Russie,Suite,4,4200,1
+Family Room,Hotel de Russie,Family,4,1800,3
+Standard Single,Albergo Santa Chiara,Single,1,95,4
+Standard Double,Albergo Santa Chiara,Double,2,150,8
+Standard Twin,Albergo Santa Chiara,Twin,2,160,4
+Family Triple,Albergo Santa Chiara,Family,3,210,3
+Modernist Double,Hotel Casa Fuster,Double,2,380,15
+Modernist Suite,Hotel Casa Fuster,Suite,3,720,8
+Gaudi Suite,Hotel Casa Fuster,Suite,4,1900,1
+Family Modernist,Hotel Casa Fuster,Family,4,560,4
+Standard Double,Praktik Vinoteca,Double,2,140,12
+Superior Double,Praktik Vinoteca,Double,2,170,8
+Twin Room,Praktik Vinoteca,Twin,2,150,5
+Single,Praktik Vinoteca,Single,1,110,4
+Standard Double,Hotel 1898,Double,2,240,16
+Deluxe Double,Hotel 1898,Double,2,310,10
+Junior Suite,Hotel 1898,Suite,3,460,6
+Family Room,Hotel 1898,Family,4,480,4
+Classic Double,Bairro Alto Hotel,Double,2,340,12
+Deluxe City,Bairro Alto Hotel,Double,2,420,8
+Suite,Bairro Alto Hotel,Suite,3,720,4
+Family Suite,Bairro Alto Hotel,Family,4,890,2
+Studio Suite,The Lumiares,Suite,2,260,15
+One Bedroom Suite,The Lumiares,Suite,3,380,10
+Two Bedroom Suite,The Lumiares,Suite,4,560,4
+Penthouse,The Lumiares,Suite,4,1200,1
+Standard Single,LX Boutique Hotel,Single,1,115,5
+Standard Double,LX Boutique Hotel,Double,2,160,10
+River View Double,LX Boutique Hotel,Double,2,210,6
+Family Room,LX Boutique Hotel,Family,3,260,3
+Superior Double,Le Bristol Paris,Double,2,1450,20
+Junior Suite,Le Bristol Paris,Suite,3,2400,10
+Prestige Suite,Le Bristol Paris,Suite,4,4800,4
+Panoramic Suite,Le Bristol Paris,Suite,4,8500,1
+Cocoon Single,Hotel Fabric,Single,1,210,5
+Industrial Double,Hotel Fabric,Double,2,280,12
+Loft Suite,Hotel Fabric,Suite,3,460,4
+Family Loft,Hotel Fabric,Family,4,540,2
+Courtyard Double,Hotel des Grands Boulevards,Double,2,260,10
+Garden View Double,Hotel des Grands Boulevards,Double,2,310,6
+Petite Suite,Hotel des Grands Boulevards,Suite,2,420,4
+Family Room,Hotel des Grands Boulevards,Family,4,460,2
+Canal Studio,Pulitzer Amsterdam,Single,2,360,12
+Deluxe Double,Pulitzer Amsterdam,Double,2,460,18
+Junior Suite,Pulitzer Amsterdam,Suite,3,780,8
+Collectors Suite,Pulitzer Amsterdam,Suite,4,1800,3
+Standard Double,Hotel V Nesplein,Double,2,260,15
+Spacious Double,Hotel V Nesplein,Double,2,310,10
+Junior Suite,Hotel V Nesplein,Suite,3,460,4
+Family Loft,Hotel V Nesplein,Family,4,540,3
+Classic Single,Hotel Estherea,Single,1,160,5
+Classic Double,Hotel Estherea,Double,2,220,10
+Canal View Double,Hotel Estherea,Double,2,280,6
+Junior Suite,Hotel Estherea,Suite,3,360,3
+Heritage Double,Augustine Hotel,Double,2,580,14
+Tower Suite,Augustine Hotel,Suite,3,1100,6
+Presidential Suite,Augustine Hotel,Suite,4,3200,2
+Family Heritage,Augustine Hotel,Family,4,890,3
+Single Pod,Hotel Josef,Single,1,180,8
+Designer Double,Hotel Josef,Double,2,240,16
+Studio Suite,Hotel Josef,Suite,2,360,6
+Family Studio,Hotel Josef,Family,4,420,3
+Eco Single,Mosaic House,Single,1,95,6
+Eco Double,Mosaic House,Double,2,140,14
+Family Loft,Mosaic House,Family,4,220,4
+Designer Suite,Mosaic House,Suite,3,280,3

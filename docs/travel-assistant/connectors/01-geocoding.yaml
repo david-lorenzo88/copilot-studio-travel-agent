@@ -1,0 +1,73 @@
+swagger: '2.0'
+info:
+  title: Geocoding
+  description: Resolves a named location, landmark, or address into geographic coordinates.
+  version: '1.0'
+host: api.opencagedata.com
+basePath: /geocode/v1
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /json:
+    get:
+      summary: Get coordinates for a location
+      description: Use this action when you need geographic coordinates (latitude and longitude) for a named place, landmark, or address. Input is the place name as a string. The output includes coordinates that other actions can use as input.
+      operationId: GeocodeLocation
+      parameters:
+        - name: q
+          in: query
+          required: true
+          type: string
+          description: The name of the place, landmark, or address to look up.
+          x-ms-summary: Location name
+        - name: key
+          in: query
+          required: true
+          type: string
+          description: OpenCage API key.
+          x-ms-visibility: internal
+        - name: limit
+          in: query
+          required: false
+          type: integer
+          default: 1
+          x-ms-visibility: internal
+        - name: no_annotations
+          in: query
+          required: false
+          type: integer
+          default: 1
+          x-ms-visibility: internal
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    formatted:
+                      type: string
+                      description: Formatted address
+                      x-ms-summary: Formatted address
+                    geometry:
+                      type: object
+                      properties:
+                        lat:
+                          type: number
+                          format: double
+                          description: Latitude
+                          x-ms-summary: Latitude
+                        lng:
+                          type: number
+                          format: double
+                          description: Longitude
+                          x-ms-summary: Longitude
+securityDefinitions: {}
+security: []

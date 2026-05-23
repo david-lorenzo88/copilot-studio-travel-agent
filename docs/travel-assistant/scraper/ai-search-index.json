@@ -1,0 +1,61 @@
+{
+  "name": "travel-activities",
+  "fields": [
+    { "name": "id",                "type": "Edm.String",              "key": true,  "filterable": true,  "sortable": false,  "facetable": false, "searchable": false, "retrievable": true },
+    { "name": "city_slug",         "type": "Edm.String",              "filterable": true,  "sortable": true,   "facetable": true,  "searchable": true,  "retrievable": true, "analyzer": "keyword" },
+    { "name": "city_name",         "type": "Edm.String",              "filterable": true,  "sortable": false,  "facetable": true,  "searchable": true,  "retrievable": true },
+    { "name": "country",           "type": "Edm.String",              "filterable": true,  "sortable": false,  "facetable": true,  "searchable": false, "retrievable": true },
+    { "name": "activity_name",     "type": "Edm.String",              "filterable": false, "sortable": false,  "facetable": false, "searchable": true,  "retrievable": true },
+    { "name": "category",          "type": "Edm.String",              "filterable": true,  "sortable": false,  "facetable": true,  "searchable": true,  "retrievable": true,  "analyzer": "keyword" },
+    { "name": "description",       "type": "Edm.String",              "filterable": false, "sortable": false,  "facetable": false, "searchable": true,  "retrievable": true },
+    { "name": "pitch",             "type": "Edm.String",              "filterable": false, "sortable": false,  "facetable": false, "searchable": true,  "retrievable": true },
+    { "name": "tags",              "type": "Collection(Edm.String)",  "filterable": true,  "sortable": false,  "facetable": true,  "searchable": true,  "retrievable": true },
+    { "name": "duration_minutes",  "type": "Edm.Int32",               "filterable": true,  "sortable": true,   "facetable": true,  "retrievable": true },
+    { "name": "estimated_cost_eur","type": "Edm.Double",              "filterable": true,  "sortable": true,   "facetable": true,  "retrievable": true },
+    { "name": "indoor",            "type": "Edm.Boolean",             "filterable": true,  "sortable": false,  "facetable": true,  "retrievable": true },
+    { "name": "best_time_of_day",  "type": "Edm.String",              "filterable": true,  "sortable": false,  "facetable": true,  "retrievable": true },
+    { "name": "latitude",          "type": "Edm.Double",              "filterable": true,  "sortable": false,  "facetable": false, "retrievable": true },
+    { "name": "longitude",         "type": "Edm.Double",              "filterable": true,  "sortable": false,  "facetable": false, "retrievable": true },
+    { "name": "source_url",        "type": "Edm.String",              "filterable": false, "sortable": false,  "facetable": false, "searchable": false, "retrievable": true },
+    { "name": "last_indexed",      "type": "Edm.DateTimeOffset",      "filterable": true,  "sortable": true,   "facetable": false, "retrievable": true },
+    {
+      "name": "content_vector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "retrievable": false,
+      "dimensions": 1536,
+      "vectorSearchProfile": "default-profile"
+    }
+  ],
+  "semantic": {
+    "configurations": [
+      {
+        "name": "travel-semantic",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "activity_name" },
+          "prioritizedContentFields": [
+            { "fieldName": "description" },
+            { "fieldName": "pitch" }
+          ],
+          "prioritizedKeywordsFields": [
+            { "fieldName": "tags" },
+            { "fieldName": "category" },
+            { "fieldName": "city_name" }
+          ]
+        }
+      }
+    ]
+  },
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw-default",
+        "kind": "hnsw",
+        "hnswParameters": { "m": 4, "efConstruction": 400, "efSearch": 500, "metric": "cosine" }
+      }
+    ],
+    "profiles": [
+      { "name": "default-profile", "algorithm": "hnsw-default" }
+    ]
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "$connections": {
+        "defaultValue": {},
+        "type": "Object"
+      },
+      "$authentication": {
+        "defaultValue": {},
+        "type": "SecureObject"
+      }
+    },
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "PowerVirtualAgents",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "guestFullName": {
+                "description": "Lead traveler name",
+                "title": "guestFullName",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "guestEmail": {
+                "description": "Used to find or create the guest",
+                "title": "guestEmail",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "guestPhone": {
+                "description": "Optional phone number",
+                "title": "guestPhone",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "destinationCitySlug": {
+                "description": "rome, barcelona, lisbon, paris, amsterdam, prague",
+                "title": "destinationCitySlug",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "originCity": {
+                "description": "Free text origin city, e.g. Madrid",
+                "title": "originCity",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "originIata": {
+                "description": "IATA code of origin airport, e.g. MAD",
+                "title": "originIata",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "destinationIata": {
+                "description": "IATA code of destination airport, e.g. FCO",
+                "title": "destinationIata",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "checkInDate": {
+                "description": "ISO date yyyy-MM-dd",
+                "title": "checkInDate",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "checkOutDate": {
+                "description": "ISO date yyyy-MM-dd",
+                "title": "checkOutDate",
+                "type": "string",
+                "x-ms-content-hint": "TEXT",
+                "x-ms-dynamically-added": true
+              },
+              "adults": {
+                "description": "Number of adults, default 2",
+                "title": "adults",
+                "type": "number",
+                "x-ms-content-hint": "NUMBER",
+                "x-ms-dynamically-added": true
+              },
+              "children": {
+                "description": "Number of children, default 0",
+                "title": "children",
+                "type": "number",
+                "x-ms-content-hint": "NUMBER",
+                "x-ms-dynamically-added": true
+              }
+            },
+            "required": [
+              "guestFullName",
+              "guestEmail",
+              "destinationCitySlug",
+              "originCity",
+              "originIata",
+              "destinationIata",
+              "checkInDate",
+              "checkOutDate",
+              "adults",
+              "children"
+            ]
+          }
+        }
+      }
+    },
+    "actions": {
+      "Initialize_nights": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "nights",
+              "type": "integer",
+              "value": "@div(sub(ticks(triggerBody()?['checkOutDate']), ticks(triggerBody()?['checkInDate'])), 864000000000)"
+            }
+          ]
+        },
+        "runAfter": {}
+      },
+      "Initialize_vGuestId": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "vGuestId",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_nights": ["Succeeded"]
+        }
+      },
+      "Initialize_vCityId": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "vCityId",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_vGuestId": ["Succeeded"]
+        }
+      },
+      "List_guests": {
+        "type": "OpenApiConnection",
+        "inputs": {
+          "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "operationId": "ListRecords",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+          },
+          "parameters": {
+            "entityName": "tra_guests",
+            "$filter": "tra_email eq '@{triggerBody()?['guestEmail']}'",
+            "$top": 1
+          },
+          "authentication": "@parameters('$authentication')"
+        },
+        "runAfter": {
+          "Initialize_vCityId": ["Succeeded"]
+        }
+      },
+      "Condition_guest_found": {
+        "type": "If",
+        "expression": {
+          "equals": [
+            "@length(outputs('List_guests')?['body/value'])",
+            0
+          ]
+        },
+        "actions": {
+          "Add_new_guest": {
+            "type": "OpenApiConnection",
+            "inputs": {
+              "host": {
+                "connectionName": "shared_commondataserviceforapps",
+                "operationId": "CreateRecord",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+              },
+              "parameters": {
+                "entityName": "tra_guests",
+                "item/tra_fullname": "@triggerBody()?['guestFullName']",
+                "item/tra_email": "@triggerBody()?['guestEmail']",
+                "item/tra_phone": "@triggerBody()?['guestPhone']"
+              },
+              "authentication": "@parameters('$authentication')"
+            },
+            "runAfter": {}
+          },
+          "Set_vGuestId_new": {
+            "type": "SetVariable",
+            "inputs": {
+              "name": "vGuestId",
+              "value": "@outputs('Add_new_guest')?['body/tra_guestid']"
+            },
+            "runAfter": {
+              "Add_new_guest": ["Succeeded"]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Set_vGuestId_existing": {
+              "type": "SetVariable",
+              "inputs": {
+                "name": "vGuestId",
+                "value": "@first(outputs('List_guests')?['body/value'])?['tra_guestid']"
+              },
+              "runAfter": {}
+            }
+          }
+        },
+        "runAfter": {
+          "List_guests": ["Succeeded"]
+        }
+      },
+      "List_cities": {
+        "type": "OpenApiConnection",
+        "inputs": {
+          "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "operationId": "ListRecords",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+          },
+          "parameters": {
+            "entityName": "tra_cities",
+            "$filter": "tra_slug eq '@{triggerBody()?['destinationCitySlug']}'",
+            "$top": 1
+          },
+          "authentication": "@parameters('$authentication')"
+        },
+        "runAfter": {
+          "Condition_guest_found": ["Succeeded"]
+        }
+      },
+      "Set_vCityId": {
+        "type": "SetVariable",
+        "inputs": {
+          "name": "vCityId",
+          "value": "@first(outputs('List_cities')?['body/value'])?['tra_cityid']"
+        },
+        "runAfter": {
+          "List_cities": ["Succeeded"]
+        }
+      },
+      "Add_quotation": {
+        "type": "OpenApiConnection",
+        "inputs": {
+          "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "operationId": "CreateRecord",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+          },
+          "parameters": {
+            "entityName": "tra_quotations",
+            "item/tra_status": 100000000,
+            "item/tra_origincity": "@triggerBody()?['originCity']",
+            "item/tra_originiata": "@triggerBody()?['originIata']",
+            "item/tra_destinationiata": "@triggerBody()?['destinationIata']",
+            "item/tra_checkindate": "@triggerBody()?['checkInDate']",
+            "item/tra_checkoutdate": "@triggerBody()?['checkOutDate']",
+            "item/tra_nights": "@variables('nights')",
+            "item/tra_adults": "@triggerBody()?['adults']",
+            "item/tra_children": "@triggerBody()?['children']",
+            "item/tra_currency": "EUR",
+            "item/tra_validuntil": "@addDays(utcNow(), 14, 'yyyy-MM-dd')",
+            "item/tra_Guest@odata.bind": "/tra_guests(@{variables('vGuestId')})",
+            "item/tra_DestinationCity@odata.bind": "/tra_cities(@{variables('vCityId')})"
+          },
+          "authentication": "@parameters('$authentication')"
+        },
+        "runAfter": {
+          "Set_vCityId": ["Succeeded"]
+        }
+      },
+      "Respond_to_Copilot": {
+        "type": "Response",
+        "kind": "PowerVirtualAgents",
+        "inputs": {
+          "statusCode": 200,
+          "body": {
+            "success": true,
+            "quotationId": "@outputs('Add_quotation')?['body/tra_quotationid']",
+            "quoteNumber": "@outputs('Add_quotation')?['body/tra_quotenumber']",
+            "message": "@concat('Draft quotation ', outputs('Add_quotation')?['body/tra_quotenumber'], ' created for ', triggerBody()?['guestFullName'], '.')"
+          },
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "title": "success",
+                "x-ms-content-hint": "BOOLEAN",
+                "type": "boolean"
+              },
+              "quotationId": {
+                "title": "quotationId",
+                "x-ms-content-hint": "TEXT",
+                "type": "string"
+              },
+              "quoteNumber": {
+                "title": "quoteNumber",
+                "x-ms-content-hint": "TEXT",
+                "type": "string"
+              },
+              "message": {
+                "title": "message",
+                "x-ms-content-hint": "TEXT",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Add_quotation": ["Succeeded"]
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "connectionReferences": {
+    "shared_commondataserviceforapps": {
+      "runtimeSource": "invoker",
+      "connection": {
+        "connectionReferenceLogicalName": "shared_commondataserviceforapps"
+      },
+      "api": {
+        "name": "shared_commondataserviceforapps"
+      }
+    }
+  },
+  "parameters": {}
+}

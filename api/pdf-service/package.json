@@ -1,0 +1,13 @@
+{
+  "name": "travel-pdf-service",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "playwright-core": "^1.44.0",
+    "@sparticuz/chromium": "^123.0.0"
+  }
+}

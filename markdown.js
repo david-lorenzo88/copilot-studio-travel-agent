@@ -31,6 +31,42 @@
   }
 
   /**
+   * Detects raw JSON payloads that are meant for internal use (itinerary data,
+   * structured agent output) and should not be rendered as a chat bubble.
+   * Kept deliberately strict so normal messages that merely contain a brace
+   * are never suppressed.
+   */
+  function isInternalJsonPayload(text) {
+    if (!text) return false;
+
+    // Strip optional code fences the model sometimes adds
+    let trimmed = text.trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/```$/i, "")
+      .trim();
+
+    // Must look like a JSON object or array to be worth parsing
+    if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) return false;
+
+    let parsed;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      return false; // not valid JSON → it's just prose, render normally
+    }
+
+    // Match the structured payloads we want to hide.
+    // Itinerary contract: an object with a "days" array.
+    if (parsed && Array.isArray(parsed.days)) return true;
+
+    // Defensive extras — uncomment/extend if other internal payloads leak:
+    // if (parsed && Array.isArray(parsed.hotels)) return true;
+    // if (parsed && parsed.confirmationCode && parsed.status) return true;
+
+    return false;
+  }
+
+  /**
    * Convert a markdown string to safe HTML.
    * Order matters: code blocks first (to protect their content from
    * being parsed as markdown), then inline elements, then blocks.

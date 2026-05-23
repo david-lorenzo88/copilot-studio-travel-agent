@@ -1,0 +1,90 @@
+swagger: '2.0'
+info:
+  title: Places
+  description: Finds places of interest such as restaurants, cafes, bars, or attractions near a given coordinate.
+  version: '1.0'
+host: api.foursquare.com
+basePath: /v3
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /places/search:
+    get:
+      summary: Find nearby places
+      description: Use this action when you need to find places of a specific type near a known location. Requires latitude and longitude as input. If you only have a place name, call GeocodeLocation first to get coordinates, then pass them here.
+      operationId: FindNearbyPlaces
+      parameters:
+        - name: ll
+          in: query
+          required: true
+          type: string
+          description: Coordinates as a "latitude,longitude" string. Example "41.8902,12.4924".
+          x-ms-summary: Coordinates (lat,lon)
+        - name: radius
+          in: query
+          required: false
+          type: integer
+          default: 1000
+          description: Search radius in meters. Default 1000.
+          x-ms-summary: Radius in meters
+        - name: categories
+          in: query
+          required: false
+          type: string
+          description: Foursquare category id. Restaurants is 13065, cafes 13032, bars 13003, museums 10027.
+          x-ms-summary: Category id
+        - name: limit
+          in: query
+          required: false
+          type: integer
+          default: 10
+          x-ms-summary: Max results
+        - name: sort
+          in: query
+          required: false
+          type: string
+          default: RATING
+          enum: [DISTANCE, RATING, RELEVANCE]
+          x-ms-summary: Sort order
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fsq_id:
+                      type: string
+                    name:
+                      type: string
+                      x-ms-summary: Place name
+                    distance:
+                      type: integer
+                      x-ms-summary: Distance in meters
+                    location:
+                      type: object
+                      properties:
+                        formatted_address:
+                          type: string
+                          x-ms-summary: Address
+                    categories:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - ApiKeyAuth: []

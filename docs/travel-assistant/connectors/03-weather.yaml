@@ -1,0 +1,80 @@
+swagger: '2.0'
+info:
+  title: Weather
+  description: Retrieves current and forecast weather for a coordinate. No API key required.
+  version: '1.0'
+host: api.open-meteo.com
+basePath: /v1
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /forecast:
+    get:
+      summary: Get weather forecast
+      description: Use this action to get a daily weather forecast for a known coordinate. Requires latitude and longitude. If you only have a place name, call GeocodeLocation first.
+      operationId: GetWeatherForecast
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+          format: double
+          x-ms-summary: Latitude
+        - name: longitude
+          in: query
+          required: true
+          type: number
+          format: double
+          x-ms-summary: Longitude
+        - name: forecast_days
+          in: query
+          required: false
+          type: integer
+          default: 5
+          x-ms-summary: Number of forecast days
+        - name: daily
+          in: query
+          required: false
+          type: string
+          default: temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode
+          x-ms-visibility: internal
+        - name: timezone
+          in: query
+          required: false
+          type: string
+          default: auto
+          x-ms-visibility: internal
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              daily:
+                type: object
+                properties:
+                  time:
+                    type: array
+                    items:
+                      type: string
+                  temperature_2m_max:
+                    type: array
+                    items:
+                      type: number
+                  temperature_2m_min:
+                    type: array
+                    items:
+                      type: number
+                  precipitation_sum:
+                    type: array
+                    items:
+                      type: number
+                  weathercode:
+                    type: array
+                    items:
+                      type: integer
+securityDefinitions: {}
+security: []

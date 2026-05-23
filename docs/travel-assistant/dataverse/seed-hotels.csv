@@ -1,0 +1,19 @@
+tra_name,tra_city_slug,tra_address,tra_stars,tra_latitude,tra_longitude,tra_description,tra_amenities
+Hotel Artemide,rome,Via Nazionale 22,4,41.9012,12.4963,Elegant 4-star near Termini with rooftop terrace,Wifi;Restaurant;Bar;Spa
+Hotel de Russie,rome,Via del Babuino 9,5,41.9089,12.4763,Historic luxury near Piazza del Popolo,Wifi;Restaurant;Bar;Spa;Gym
+Albergo Santa Chiara,rome,Via di Santa Chiara 21,3,41.8986,12.4775,Family-run hotel steps from the Pantheon,Wifi;Restaurant
+Hotel Casa Fuster,barcelona,Passeig de Gracia 132,5,41.3979,2.1611,Modernist landmark on Passeig de Gracia,Wifi;Restaurant;Bar;Pool;Gym;Spa
+Praktik Vinoteca,barcelona,Balmes 51,3,41.3902,2.1607,Wine-themed boutique in Eixample,Wifi;Bar
+Hotel 1898,barcelona,La Rambla 109,4,41.3825,2.1729,Colonial-era building on Las Ramblas with rooftop pool,Wifi;Restaurant;Pool;Spa
+Bairro Alto Hotel,lisbon,Praca Luis de Camoes 2,5,38.7106,-9.1426,Boutique luxury overlooking Chiado,Wifi;Restaurant;Bar;Spa
+The Lumiares,lisbon,Rua do Diario de Noticias 142,4,38.7137,-9.1454,Suite hotel in Bairro Alto with rooftop bar,Wifi;Bar;Gym
+LX Boutique Hotel,lisbon,Rua do Alecrim 12,3,38.7095,-9.1431,Riverfront boutique near Cais do Sodre,Wifi;Restaurant
+Le Bristol Paris,paris,112 Rue du Faubourg Saint-Honore,5,48.8714,2.3162,Palace hotel near the Elysee with Michelin dining,Wifi;Restaurant;Bar;Pool;Gym;Spa
+Hotel Fabric,paris,31 Rue de la Folie Mericourt,4,48.8651,2.3741,Industrial-chic in the 11th arrondissement,Wifi;Bar;Gym
+Hotel des Grands Boulevards,paris,17 Boulevard Poissonniere,3,48.8709,2.3464,Romantic boutique near the Grand Boulevards,Wifi;Restaurant;Bar
+Pulitzer Amsterdam,amsterdam,Prinsengracht 323,5,52.3735,4.8847,25 canal houses joined into a 5-star hotel,Wifi;Restaurant;Bar;Gym
+Hotel V Nesplein,amsterdam,Nes 49,4,52.3702,4.8956,Designer hotel near Dam Square,Wifi;Restaurant;Bar;Gym
+Hotel Estherea,amsterdam,Singel 303-309,3,52.3697,4.8888,Family-run hotel on the Singel canal,Wifi
+Augustine Hotel,prague,Letenska 12,5,50.0879,14.4042,Marriott Luxury Collection in a former monastery,Wifi;Restaurant;Bar;Spa;Gym
+Hotel Josef,prague,Rybna 20,4,50.0894,14.4296,Minimalist design hotel in Old Town,Wifi;Bar;Gym
+Mosaic House,prague,Odboru 4,3,50.0779,14.4188,Eco-conscious design hotel in New Town,Wifi;Restaurant;Bar

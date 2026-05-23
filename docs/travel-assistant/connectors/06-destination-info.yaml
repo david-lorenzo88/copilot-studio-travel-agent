@@ -1,0 +1,56 @@
+swagger: '2.0'
+info:
+  title: Destination Info
+  description: Returns a short factual summary of a destination from Wikipedia.
+  version: '1.0'
+host: en.wikipedia.org
+basePath: /api/rest_v1
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /page/summary/{title}:
+    get:
+      summary: Get destination summary
+      description: Use this action to get a concise factual summary of a city, country, or landmark from Wikipedia.
+      operationId: GetDestinationSummary
+      parameters:
+        - name: title
+          in: path
+          required: true
+          type: string
+          description: Destination name. Spaces will be encoded as underscores.
+          x-ms-summary: Destination name
+        - name: redirect
+          in: query
+          required: false
+          type: boolean
+          default: true
+          x-ms-visibility: internal
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                x-ms-summary: Title
+              description:
+                type: string
+                x-ms-summary: Short description
+              extract:
+                type: string
+                x-ms-summary: Summary text
+              content_urls:
+                type: object
+                properties:
+                  desktop:
+                    type: object
+                    properties:
+                      page:
+                        type: string
+securityDefinitions: {}
+security: []

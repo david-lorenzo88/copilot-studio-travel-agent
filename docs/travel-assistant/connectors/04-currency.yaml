@@ -1,0 +1,55 @@
+swagger: '2.0'
+info:
+  title: Currency
+  description: Converts an amount from one currency to another using ECB reference rates. No API key required.
+  version: '1.0'
+host: api.frankfurter.app
+basePath: /
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /latest:
+    get:
+      summary: Convert currency
+      description: Use this action to convert an amount of money from one currency to another. The result reflects the latest ECB reference exchange rate.
+      operationId: ConvertCurrency
+      parameters:
+        - name: amount
+          in: query
+          required: true
+          type: number
+          format: double
+          x-ms-summary: Amount to convert
+        - name: from
+          in: query
+          required: true
+          type: string
+          description: Source currency ISO code. Example EUR.
+          x-ms-summary: From currency
+        - name: to
+          in: query
+          required: true
+          type: string
+          description: Target currency ISO code. Example USD.
+          x-ms-summary: To currency
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              amount:
+                type: number
+              base:
+                type: string
+              date:
+                type: string
+              rates:
+                type: object
+                additionalProperties:
+                  type: number
+securityDefinitions: {}
+security: []

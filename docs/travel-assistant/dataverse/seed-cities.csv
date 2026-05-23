@@ -1,0 +1,8 @@
+# Cities
+tra_name,tra_slug,tra_country,tra_latitude,tra_longitude,tra_timezone
+Rome,rome,Italy,41.9028,12.4964,Europe/Rome
+Barcelona,barcelona,Spain,41.3851,2.1734,Europe/Madrid
+Lisbon,lisbon,Portugal,38.7223,-9.1393,Europe/Lisbon
+Paris,paris,France,48.8566,2.3522,Europe/Paris
+Amsterdam,amsterdam,Netherlands,52.3676,4.9041,Europe/Amsterdam
+Prague,prague,Czech Republic,50.0755,14.4378,Europe/Prague

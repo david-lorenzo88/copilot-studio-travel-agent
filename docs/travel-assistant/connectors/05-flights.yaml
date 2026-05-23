@@ -1,0 +1,75 @@
+swagger: '2.0'
+info:
+  title: Flights
+  description: Returns real-time information about a flight, including status, schedule, and route.
+  version: '1.0'
+host: api.aviationstack.com
+basePath: /v1
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+paths:
+  /flights:
+    get:
+      summary: Get flight info
+      description: Use this action to look up a flight by its IATA flight number. Returns status, departure and arrival airports, scheduled times, and live position when available.
+      operationId: GetFlightInfo
+      parameters:
+        - name: flight_iata
+          in: query
+          required: true
+          type: string
+          description: IATA flight code. Example BA2734.
+          x-ms-summary: Flight code (IATA)
+        - name: access_key
+          in: query
+          required: true
+          type: string
+          x-ms-visibility: internal
+        - name: limit
+          in: query
+          required: false
+          type: integer
+          default: 1
+          x-ms-visibility: internal
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    flight_status:
+                      type: string
+                      x-ms-summary: Status
+                    departure:
+                      type: object
+                      properties:
+                        airport:
+                          type: string
+                        iata:
+                          type: string
+                        scheduled:
+                          type: string
+                    arrival:
+                      type: object
+                      properties:
+                        airport:
+                          type: string
+                        iata:
+                          type: string
+                        scheduled:
+                          type: string
+                    airline:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+securityDefinitions: {}
+security: []
