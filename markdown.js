@@ -251,4 +251,5 @@
 
   window.mdToHtml = mdToHtml;
   window.looksLikeMarkdown = looksLikeMarkdown;
+  window.isInternalJsonPayload = isInternalJsonPayload;
 })();
