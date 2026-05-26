@@ -415,7 +415,12 @@
     }
 
     const reply = await sendToBot(userText);
-    const spoken = textForSpeech(reply);
+
+    // Summarize long replies on the fly so the spoken audio stays short on
+    // stage. The full reply already rendered in the chat bubble; only the
+    // voice gets the shortened version. Short replies pass through unchanged.
+    const summarized = await speakableSummary(reply);
+    const spoken = textForSpeech(summarized);
     if (spoken) {
       try {
         await speech.speak(spoken);

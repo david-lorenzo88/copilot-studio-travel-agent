@@ -79,52 +79,7 @@ module.exports = async function (context, req) {
     const q = await qResp.json();
     const quotationGuid = q.tra_quotationid;
 
-    // 2) The days for this quotation, sorted
-    const daysUrl = `${dvUrl}/api/data/v9.2/tra_quotationdaies` +   // <-- daies, not days
-    `?$filter=_tra_quotation_value eq ${quotationGuid}` +
-    `&$orderby=tra_daynumber asc`;
-    const daysResp = await fetch(daysUrl, { headers });
-    if (!daysResp.ok) {
-        const detail = await daysResp.text();
-        context.log.error("Days fetch failed", daysResp.status, detail);
-        context.res = { status: 200, body: { ...shaped, days: [], _daysError: detail } };
-        return;
-    }
-    const daysData = await daysResp.json();
-    const days = daysData.value || [];
-
-    // 3) Activities per day (one call each — few days, negligible)
-    const dayObjects = [];
-    for (const d of days) {
-      const dayId = d.tra_quotationdayid;
-        const actResp = await fetch(
-        `${dvUrl}/api/data/v9.2/tra_quotationactivities` +
-        `?$filter=_tra_quotationday_value eq ${dayId}` +
-        `&$orderby=tra_starttime asc`,
-        { headers }
-        );
-      const actData = actResp.ok ? await actResp.json() : { value: [] };
-      const activities = (actData.value || []).map(a => ({
-        name: a.tra_name,
-        timeSlot: a["tra_timeslot@OData.Community.Display.V1.FormattedValue"] || "",
-        startTime: a.tra_starttime || "",
-        durationMinutes: a.tra_durationminutes || 0,
-        cost: a.tra_estimatedcost || 0,
-        category: a.tra_category || ""
-      }));
-
-      dayObjects.push({
-        dayNumber: d.tra_daynumber,
-        date: d.tra_date,
-        weather: d.tra_weather || "",
-        morning: d.tra_morningsummary || "",
-        afternoon: d.tra_afternoonsummary || "",
-        evening: d.tra_eveningsummary || "",
-        dayTotal: d.tra_daytotal || 0,
-        activities
-      });
-    }
-
+    // Shape the header first so we can return it even if the day fetch fails.
     const hotel = q.tra_Hotel || {};
     const room = q.tra_Room || {};
     const guest = q.tra_Guest || {};
@@ -162,8 +117,60 @@ module.exports = async function (context, req) {
         flights: q.tra_flightssubtotal || 0
       },
       total: q.tra_totalprice || 0,
-      days: dayObjects
+      days: []
     };
+
+    // 2) The days for this quotation, sorted.
+    // NOTE: the entity set name is tra_quotationdaies (Dataverse pluralized
+    // "quotationday" -> "daies"), NOT tra_quotationdays.
+    const daysUrl = `${dvUrl}/api/data/v9.2/tra_quotationdaies` +
+      `?$filter=_tra_quotation_value eq ${quotationGuid}` +
+      `&$orderby=tra_daynumber asc`;
+    const daysResp = await fetch(daysUrl, { headers });
+    if (!daysResp.ok) {
+      const detail = await daysResp.text();
+      context.log.error("Days fetch failed", daysResp.status, detail);
+      // Return the header with an empty itinerary and surface the error so it
+      // is visible during debugging rather than silently swallowed.
+      context.res = { status: 200, body: { ...shaped, days: [], _daysError: detail } };
+      return;
+    }
+    const daysData = await daysResp.json();
+    const days = daysData.value || [];
+
+    // 3) Activities per day (one call each — few days, negligible)
+    const dayObjects = [];
+    for (const d of days) {
+      const dayId = d.tra_quotationdayid;
+      const actResp = await fetch(
+        `${dvUrl}/api/data/v9.2/tra_quotationactivities` +
+        `?$filter=_tra_quotationday_value eq ${dayId}` +
+        `&$orderby=tra_starttime asc`,
+        { headers }
+      );
+      const actData = actResp.ok ? await actResp.json() : { value: [] };
+      const activities = (actData.value || []).map(a => ({
+        name: a.tra_name,
+        timeSlot: a["tra_timeslot@OData.Community.Display.V1.FormattedValue"] || "",
+        startTime: a.tra_starttime || "",
+        durationMinutes: a.tra_durationminutes || 0,
+        cost: a.tra_estimatedcost || 0,
+        category: a.tra_category || ""
+      }));
+
+      dayObjects.push({
+        dayNumber: d.tra_daynumber,
+        date: d.tra_date,
+        weather: d.tra_weather || "",
+        morning: d.tra_morningsummary || "",
+        afternoon: d.tra_afternoonsummary || "",
+        evening: d.tra_eveningsummary || "",
+        dayTotal: d.tra_daytotal || 0,
+        activities
+      });
+    }
+
+    shaped.days = dayObjects;
 
     context.res = {
       status: 200,

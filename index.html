@@ -88,6 +88,10 @@
             d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
         </svg>
       </button>
+      <div id="voiceActivity" class="voice-status" aria-live="polite" hidden>
+        <span class="voice-status-dot"></span>
+        <span class="voice-status-label">Summarizing…</span>
+      </div>
       <form id="composeForm" class="compose">
         <input id="composeInput" type="text" autocomplete="off" placeholder="Ask about a trip, hotel, restaurants…"
           aria-label="Type your message" />

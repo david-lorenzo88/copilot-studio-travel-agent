@@ -1053,3 +1053,61 @@ body {
   transition: background 120ms ease, transform 80ms ease;
 }
 .qp-download:hover { background:var(--accent-2); transform:scale(1.02); }
+
+
+/* ===== Voice status indicator (composer "Summarizing…" / "Speaking…" pill) =====
+   Append this block to the end of styles.css. It styles the #voiceActivity
+   element added to the composer. Distinct from the topbar #voiceStatus pill. */
+
+.voice-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(106, 167, 255, 0.12);
+  border: 1px solid rgba(106, 167, 255, 0.25);
+  color: var(--accent, #6aa7ff);
+  transition: opacity 200ms ease, background 200ms ease, color 200ms ease;
+  white-space: nowrap;
+}
+.voice-status[hidden] { display: none; }
+
+.voice-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* Summarizing: amber, pulsing — signals "working, please wait". */
+.voice-status.is-summarizing {
+  background: rgba(255, 193, 7, 0.12);
+  border-color: rgba(255, 193, 7, 0.30);
+  color: var(--warn, #ffc107);
+}
+.voice-status.is-summarizing .voice-status-dot {
+  animation: vs-pulse 900ms ease-in-out infinite;
+}
+
+/* Speaking: accent blue, gentle blink. */
+.voice-status.is-speaking {
+  background: rgba(106, 167, 255, 0.14);
+  border-color: rgba(106, 167, 255, 0.30);
+  color: var(--accent, #6aa7ff);
+}
+.voice-status.is-speaking .voice-status-dot {
+  animation: vs-blink 700ms ease-in-out infinite;
+}
+
+@keyframes vs-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%      { transform: scale(1.5); opacity: 0.5; }
+}
+@keyframes vs-blink {
+  0%, 100% { opacity: 1;    }
+  50%      { opacity: 0.35; }
+}

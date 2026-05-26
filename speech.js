@@ -6,6 +6,71 @@
    - Short-lived authorization tokens from /api/speech/token
    ============================================================ */
 
+/* ---- Voice status indicator (summarizing / speaking pill in the composer) ---- */
+const VoiceStatus = (() => {
+  const el = document.getElementById("voiceActivity");
+  const label = el?.querySelector(".voice-status-label");
+
+  function set(state) {
+    if (!el) return;
+    el.classList.remove("is-summarizing", "is-speaking");
+    if (state === "summarizing") {
+      el.hidden = false;
+      el.classList.add("is-summarizing");
+      if (label) label.textContent = "Summarizing…";
+    } else if (state === "speaking") {
+      el.hidden = false;
+      el.classList.add("is-speaking");
+      if (label) label.textContent = "Speaking…";
+    } else {
+      el.hidden = true;
+    }
+  }
+  return { set };
+})();
+
+/* ---- On-the-fly summary for spoken responses ----
+   Long on-screen replies (flight lists, itineraries) make for painfully long
+   audio on stage. This shortens them to one spoken sentence via a server-side
+   Foundry proxy (/api/foundry/summarize), keeping the Foundry token off the
+   browser. The full text still renders in the chat bubble; only the audio is
+   shortened. Short replies are spoken verbatim with no round trip.
+
+   Shows the "Summarizing…" pill while the call is in flight so any latency
+   reads as intentional. Falls back to a canned line if the call fails or is
+   slow, so the demo never hangs silently. */
+async function speakableSummary(fullText, { timeoutMs = 3500 } = {}) {
+  if (!fullText) return "";
+  if (fullText.length < 280) return fullText;   // short → speak as-is, no pill, no call
+
+  VoiceStatus.set("summarizing");
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const resp = await fetch("/api/foundry/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: fullText }),
+      signal: controller.signal
+    });
+    if (!resp.ok) throw new Error(`Summarize failed: ${resp.status}`);
+    const data = await resp.json();
+    const summary = (data.summary || "").trim();
+    return summary || "Here are your options on screen.";
+  } catch (e) {
+    console.warn("Summary failed or timed out, speaking fallback", e);
+    return "I've put the details on screen for you.";
+  } finally {
+    clearTimeout(timer);
+    // Do not clear the pill here — speak() transitions it to "speaking".
+  }
+}
+
+window.speakableSummary = speakableSummary;
+window.VoiceStatus = VoiceStatus;
+
 class SpeechClient extends EventTarget {
   constructor({ tokenUrl, recognitionLanguage, synthesisVoice }) {
     super();
@@ -23,6 +88,8 @@ class SpeechClient extends EventTarget {
     this.isListening = false;
     this.isSpeaking = false;
   }
+
+  
 
   setVoiceState(state) {
     this.dispatchEvent(new CustomEvent("statechange", { detail: state }));
@@ -157,6 +224,7 @@ class SpeechClient extends EventTarget {
     this.synthesizer = synthesizer;
     this.isSpeaking = true;
     this.setVoiceState("speaking");
+    VoiceStatus.set("speaking");
 
     const ssml = this._toSsml(text);
 
@@ -168,6 +236,7 @@ class SpeechClient extends EventTarget {
           this.synthesizer = null;
           this.isSpeaking = false;
           this.setVoiceState("idle");
+          VoiceStatus.set("idle");
           if (result.reason === SDK.ResultReason.SynthesizingAudioCompleted) {
             resolve();
           } else {
@@ -179,6 +248,7 @@ class SpeechClient extends EventTarget {
           this.synthesizer = null;
           this.isSpeaking = false;
           this.setVoiceState("idle");
+          VoiceStatus.set("idle");
           reject(new Error(err));
         }
       );
@@ -192,6 +262,7 @@ class SpeechClient extends EventTarget {
     }
     this.isSpeaking = false;
     this.setVoiceState("idle");
+    VoiceStatus.set("idle");
   }
 
   /**
