@@ -27,6 +27,28 @@ class HotelMap {
     }
 
     window.addEventListener("agent:hotels", e => this.onHotels(e.detail));
+
+    // Delegated handler for the "Book this hotel" button inside popups.
+    // Popups are created/destroyed dynamically by Leaflet, so we listen
+    // once on the document and read the templated message off the button.
+    document.addEventListener("click", e => {
+      const btn = e.target.closest && e.target.closest(".map-popup-book");
+      if (btn) this.onBookClick(btn);
+    });
+  }
+
+  /**
+   * Send the "book this hotel" request to the bot. We don't have direct
+   * access to the DirectLine client from here (it lives in app.js), so we
+   * dispatch an app:send event that app.js routes through sendToBot —
+   * mirroring how the rest of the UI talks to the agent via DOM events.
+   */
+  onBookClick(btn) {
+    const message = btn.getAttribute("data-book-message");
+    if (!message) return;
+    btn.disabled = true;
+    btn.textContent = "Adding to quotation…";
+    window.dispatchEvent(new CustomEvent("app:send", { detail: { text: message } }));
   }
 
   ensureContainer() {
@@ -146,17 +168,58 @@ class HotelMap {
   }
 
   popupHtml(hotel) {
-    const stars = "★".repeat(hotel.stars || 0);
-    const price = hotel.price
-      ? `${hotel.currency || "€"}${Math.round(hotel.price).toLocaleString()}`
+    const currency = this.currencySymbol(hotel.currency);
+    const starCount = Number(hotel.stars) || 0;
+    const stars = starCount
+      ? `★`.repeat(starCount) + `☆`.repeat(Math.max(0, 5 - starCount))
       : "";
-    const subtitle = [stars, price].filter(Boolean).join(" · ");
+
+    // Detail rows — only render the ones we actually have data for.
+    const rows = [];
+    if (starCount) {
+      rows.push(this.detailRow("Rating", `<span class="map-popup-stars">${stars}</span> ${starCount}/5`));
+    }
+    if (hotel.roomName) {
+      rows.push(this.detailRow("Room", this.escape(hotel.roomName)));
+    }
+    if (typeof hotel.lat === "number" && typeof hotel.lon === "number") {
+      rows.push(this.detailRow("Coordinates", `${hotel.lat.toFixed(4)}, ${hotel.lon.toFixed(4)}`));
+    }
+    if (hotel.id) {
+      rows.push(this.detailRow("Hotel ID", `<span class="map-popup-id">${this.escape(hotel.id)}</span>`));
+    }
+
+    const price = hotel.price != null && hotel.price !== ""
+      ? `${currency}${Math.round(hotel.price).toLocaleString()}`
+      : "";
+
+    const bookMessage = `Add hotel ${hotel.name || ""} with room ${hotel.roomName || ""} to the quotation`;
+
     return `
       <div class="map-popup">
         <div class="map-popup-name">${this.escape(hotel.name)}</div>
-        ${subtitle ? `<div class="map-popup-meta">${subtitle}</div>` : ""}
+        ${rows.length ? `<div class="map-popup-details">${rows.join("")}</div>` : ""}
+        ${price ? `<div class="map-popup-price"><span class="map-popup-price-value">${price}</span><span class="map-popup-price-unit"> / night</span></div>` : ""}
+        <button type="button" class="map-popup-book" data-book-message="${this.escapeAttr(bookMessage)}">
+          Book this hotel
+        </button>
       </div>
     `;
+  }
+
+  detailRow(label, valueHtml) {
+    return `
+      <div class="map-popup-row">
+        <span class="map-popup-label">${this.escape(label)}</span>
+        <span class="map-popup-value">${valueHtml}</span>
+      </div>
+    `;
+  }
+
+  currencySymbol(currency) {
+    const map = { EUR: "€", USD: "$", GBP: "£", JPY: "¥" };
+    if (!currency) return "€";
+    return map[String(currency).toUpperCase()] || `${currency} `;
   }
 
   escape(s) {
@@ -164,6 +227,10 @@ class HotelMap {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+  }
+
+  escapeAttr(s) {
+    return this.escape(s).replace(/"/g, "&quot;");
   }
 }
 

@@ -358,6 +358,16 @@
     });
   }
 
+  // Components that live outside this scope (e.g. HotelMap popups) ask us to
+  // send a message to the bot by dispatching an app:send DOM event. We echo
+  // it as a user bubble and route it through the normal sendToBot path.
+  window.addEventListener("app:send", (e) => {
+    const text = e.detail?.text?.trim();
+    if (!text) return;
+    addBubble("user", text);
+    sendToBot(text);
+  });
+
   // ---------- Voice ----------
 
   const speech = new SpeechClient({
