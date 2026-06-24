@@ -35,6 +35,10 @@ class PanelSwitcher {
     const panel = this.panels.find(p => p.key === key);
     if (!panel) return;
 
+    // Make sure the assistant window is open so the panel is actually visible
+    // (panels render only while the floating window is open).
+    if (typeof window.openAssistant === "function") window.openAssistant();
+
     // Hide all panels
     for (const p of this.panels) {
       const el = document.getElementById(p.panelId);

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Travel Assistant · Multi-Agent Demo</title>
+  <title>Untethered365 Travel Agent · Multi-Agent Demo</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -15,42 +15,72 @@
 </head>
 
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark">✦</span>
-        <span class="brand-name">Travel Assistant</span>
-      </div>
-      <div class="status-pills">
-        <button id="showMapButton" class="panel-toggle hidden" aria-label="Show map" title="Show map">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path fill="currentColor"
-              d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" />
-          </svg>
-          <span>Map</span>
-        </button>
-        <button id="showReservationButton" class="panel-toggle hidden" aria-label="Show reservation"
-          title="Show reservation">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path fill="currentColor"
-              d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V9h14v12zm0-14H5V5h14v2z" />
-          </svg>
-          <span>Booking</span>
-        </button>
-        <button id="showQuotationButton" class="panel-toggle hidden" aria-label="Show quotation" title="Show quotation">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-          </svg>
-          <span>Quote</span>
-        </button>
-        <span id="connectionStatus" class="pill pill-muted">Connecting…</span>
-        <span id="voiceStatus" class="pill pill-muted">Voice off</span>
-      </div>
-    </header>
+  <!-- Full-bleed destination slideshow + darkening backdrop (behind everything) -->
+  <div class="bg-slideshow" id="bgSlideshow" aria-hidden="true"></div>
+  <div class="bg-backdrop" aria-hidden="true"></div>
 
-    <div class="layout" id="layout">
+  <!-- Floating assistant: chat window (left half) + panel dock (right half) -->
+  <div class="assistant" id="assistant">
+    <section class="chat-window" id="chatWindow" aria-label="Untethered365 Travel Agent">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand-mark" src="./assets/untethered365-logo.svg" alt="Untethered365" />
+          <span class="brand-name">Untethered365 Travel Agent</span>
+        </div>
+        <div class="status-pills">
+          <button id="showMapButton" class="panel-toggle hidden" aria-label="Show map" title="Show map">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor"
+                d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" />
+            </svg>
+            <span>Map</span>
+          </button>
+          <button id="showReservationButton" class="panel-toggle hidden" aria-label="Show reservation"
+            title="Show reservation">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor"
+                d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V9h14v12zm0-14H5V5h14v2z" />
+            </svg>
+            <span>Booking</span>
+          </button>
+          <button id="showQuotationButton" class="panel-toggle hidden" aria-label="Show quotation" title="Show quotation">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>
+            <span>Quote</span>
+          </button>
+          <span id="connectionStatus" class="pill pill-muted">Connecting…</span>
+          <span id="voiceStatus" class="pill pill-muted">Voice off</span>
+        </div>
+      </header>
+
       <main class="chat" id="chat" aria-live="polite"></main>
 
+      <footer class="composer">
+        <button id="micButton" class="mic" aria-label="Toggle voice mode" title="Tap to talk">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor"
+              d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
+          </svg>
+        </button>
+        <div id="voiceActivity" class="voice-status" aria-live="polite" hidden>
+          <span class="voice-status-dot"></span>
+          <span class="voice-status-label">Summarizing…</span>
+        </div>
+        <form id="composeForm" class="compose">
+          <input id="composeInput" type="text" autocomplete="off" placeholder="Ask about a trip, hotel, restaurants…"
+            aria-label="Type your message" />
+          <button type="submit" class="send" aria-label="Send">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path fill="currentColor"
+                d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.16L4 11l9 1-9 1-1.99 6.24a1 1 0 0 0 1.39 1.16z" />
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </section>
+
+    <div class="panel-dock" id="layout">
       <aside class="side-panel map-panel" id="mapPanel" aria-label="Hotels on map">
         <button class="panel-close" id="mapClose" aria-label="Close map" title="Close map">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -80,30 +110,17 @@
         <div id="quotationContent" class="quotation-content"></div>
       </aside>
     </div>
-
-    <footer class="composer">
-      <button id="micButton" class="mic" aria-label="Toggle voice mode" title="Tap to talk">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path fill="currentColor"
-            d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
-        </svg>
-      </button>
-      <div id="voiceActivity" class="voice-status" aria-live="polite" hidden>
-        <span class="voice-status-dot"></span>
-        <span class="voice-status-label">Summarizing…</span>
-      </div>
-      <form id="composeForm" class="compose">
-        <input id="composeInput" type="text" autocomplete="off" placeholder="Ask about a trip, hotel, restaurants…"
-          aria-label="Type your message" />
-        <button type="submit" class="send" aria-label="Send">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path fill="currentColor"
-              d="M3.4 20.4l17.45-7.48a1 1 0 0 0 0-1.84L3.4 3.6a1 1 0 0 0-1.39 1.16L4 11l9 1-9 1-1.99 6.24a1 1 0 0 0 1.39 1.16z" />
-          </svg>
-        </button>
-      </form>
-    </footer>
   </div>
+
+  <!-- Floating launcher: opens/closes the assistant. Uses the Untethered365 logo. -->
+  <button class="launcher" id="launcher" aria-label="Open Untethered365 Travel Agent" aria-expanded="false" title="Untethered365 Travel Agent">
+    <span class="launcher-pulse" aria-hidden="true"></span>
+    <img class="launcher-logo" src="./assets/untethered365-logo.svg" alt="" aria-hidden="true" />
+    <svg class="launcher-close" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+      <path fill="currentColor"
+        d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+    </svg>
+  </button>
 
   <!-- Config: edit before deploying. -->
   <script>
@@ -136,6 +153,8 @@
 <script src="./quotation-panel.js" defer></script>
 <script src="./markdown.js" defer></script>
 <script src="./app.js" defer></script>
+<script src="./bg-slideshow.js" defer></script>
+<script src="./launcher.js" defer></script>
 </body>
 
 </html>
