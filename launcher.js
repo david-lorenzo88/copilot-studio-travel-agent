@@ -28,6 +28,15 @@
     setOpen(!document.body.classList.contains("assistant-open"));
   });
 
+  // Any landing-page CTA with .js-open-chat opens the assistant.
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest(".js-open-chat");
+    if (trigger) {
+      e.preventDefault();
+      setOpen(true);
+    }
+  });
+
   // Let other modules (e.g. the panel switcher) open the window when the agent
   // surfaces a map, booking, or quotation panel.
   window.openAssistant = () => {
@@ -40,4 +49,12 @@
       setOpen(false);
     }
   });
+
+  // Landing nav: add a frosted background once the user scrolls off the hero.
+  const nav = document.getElementById("siteNav");
+  if (nav) {
+    const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
 })();

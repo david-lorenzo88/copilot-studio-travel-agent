@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Untethered365 Travel Agent · Multi-Agent Demo</title>
+  <title>Trek or Treat Travel — Adventures worth the trek</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/trek-or-treat-logo.svg" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -19,13 +20,223 @@
   <div class="bg-slideshow" id="bgSlideshow" aria-hidden="true"></div>
   <div class="bg-backdrop" aria-hidden="true"></div>
 
+  <!-- ============================================================
+       Landing page · Trek or Treat Travel
+       Marketing content. The AI travel agent lives in the floating
+       widget below and is opened via the .js-open-chat buttons.
+       ============================================================ -->
+  <div class="landing">
+    <!-- Nav -->
+    <header class="site-nav" id="siteNav">
+      <a class="site-brand" href="#top" aria-label="Trek or Treat Travel home">
+        <img class="site-brand-mark" src="./assets/untethered365-logo.svg" alt="" />
+        <span class="site-brand-name">Trek or Treat <span>Travel</span></span>
+      </a>
+      <nav class="site-links" aria-label="Primary">
+        <a href="#destinations">Destinations</a>
+        <a href="#why">Why us</a>
+        <a href="#how">How it works</a>
+        <a href="#stories">Stories</a>
+      </nav>
+      <button class="btn btn-primary js-open-chat" type="button">Plan my trip</button>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <span class="eyebrow">Boutique adventure travel · since 2014</span>
+        <h1 class="hero-title">Adventures worth<br />the trek.</h1>
+        <p class="hero-sub">
+          From midnight-sun ridgelines to lantern-lit old towns, Trek or Treat Travel
+          crafts hand-built itineraries for the curious. Tell our travel agent where
+          you're dreaming of — we'll handle the rest.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg js-open-chat" type="button">Start planning — it's free</button>
+          <a class="btn btn-ghost btn-lg" href="#destinations">Browse destinations</a>
+        </div>
+        <dl class="hero-stats">
+          <div><dt>12k+</dt><dd>trips booked</dd></div>
+          <div><dt>60+</dt><dd>countries</dd></div>
+          <div><dt>4.9★</dt><dd>traveler rating</dd></div>
+        </dl>
+      </div>
+      <div class="hero-scroll" aria-hidden="true">Scroll to explore</div>
+    </section>
+
+    <!-- Content sits on a solid panel so the fixed slideshow stays in the hero -->
+    <div class="landing-body">
+      <!-- Destinations -->
+      <section class="section" id="destinations">
+        <div class="section-head">
+          <span class="kicker">Featured trips</span>
+          <h2>Where will you wander next?</h2>
+          <p>Curated escapes our travelers can't stop raving about. Each one is fully customizable.</p>
+        </div>
+        <div class="dest-grid">
+          <article class="dest-card">
+            <div class="dest-img" style="background-image:url('https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=900&q=80')"></div>
+            <div class="dest-body">
+              <div class="dest-row"><h3>Patagonia Ridgelines</h3><span class="dest-price">from €2,490</span></div>
+              <p>9 days · Chile &amp; Argentina · guided W-trek with cozy refugios.</p>
+              <span class="dest-tag">Hiking</span><span class="dest-tag">Small group</span>
+            </div>
+          </article>
+          <article class="dest-card">
+            <div class="dest-img" style="background-image:url('https://images.unsplash.com/photo-1504829857797-ddff29c27927?auto=format&fit=crop&w=900&q=80')"></div>
+            <div class="dest-body">
+              <div class="dest-row"><h3>Iceland Ring of Fire</h3><span class="dest-price">from €1,980</span></div>
+              <p>7 days · waterfalls, black-sand coasts &amp; aurora hunting.</p>
+              <span class="dest-tag">Self-drive</span><span class="dest-tag">Northern lights</span>
+            </div>
+          </article>
+          <article class="dest-card">
+            <div class="dest-img" style="background-image:url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=80')"></div>
+            <div class="dest-body">
+              <div class="dest-row"><h3>Kyoto Lantern Trails</h3><span class="dest-price">from €2,750</span></div>
+              <p>8 days · temples, tea houses &amp; the autumn maple season.</p>
+              <span class="dest-tag">Culture</span><span class="dest-tag">Foodie</span>
+            </div>
+          </article>
+          <article class="dest-card">
+            <div class="dest-img" style="background-image:url('https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?auto=format&fit=crop&w=900&q=80')"></div>
+            <div class="dest-body">
+              <div class="dest-row"><h3>Marrakech &amp; the Atlas</h3><span class="dest-price">from €1,640</span></div>
+              <p>6 days · medina souks, Berber villages &amp; desert nights.</p>
+              <span class="dest-tag">Desert</span><span class="dest-tag">Luxury riad</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Why us -->
+      <section class="section" id="why">
+        <div class="section-head">
+          <span class="kicker">Why Trek or Treat</span>
+          <h2>Big adventures, zero guesswork.</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature">
+            <div class="feature-ico">🧭</div>
+            <h3>Tailor-made routes</h3>
+            <p>No cookie-cutter packages. Every itinerary is built around your pace, budget and bucket list.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-ico">🥾</div>
+            <h3>Local trail experts</h3>
+            <p>Hand-picked guides who actually live there — and know the trailheads tourists miss.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-ico">💬</div>
+            <h3>24/7 travel agent</h3>
+            <p>Our AI travel agent quotes hotels, maps routes and books on the spot — any hour, any timezone.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-ico">🛟</div>
+            <h3>Flexible &amp; protected</h3>
+            <p>Free changes up to 30 days out and round-the-clock support while you're on the road.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="section" id="how">
+        <div class="section-head">
+          <span class="kicker">How it works</span>
+          <h2>Three steps to your next trek.</h2>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <h3>Tell us your dream</h3>
+            <p>Chat with our travel agent about where, when and your vibe — beaches, peaks or pumpkin-spiced city strolls.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <h3>We craft the plan</h3>
+            <p>Get a personalized itinerary with hotels, maps and a transparent quote in minutes, not weeks.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <h3>Pack &amp; go</h3>
+            <p>Confirm in a tap. We handle the bookings and stay on call for the whole journey.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Testimonials -->
+      <section class="section" id="stories">
+        <div class="section-head">
+          <span class="kicker">Traveler stories</span>
+          <h2>Loved by 12,000+ explorers.</h2>
+        </div>
+        <div class="quote-grid">
+          <figure class="quote">
+            <blockquote>"Booked a two-week Patagonia trek in one evening's chat. Every detail was spot on — even the empanada stops."</blockquote>
+            <figcaption>— Marta R., Lisbon</figcaption>
+          </figure>
+          <figure class="quote">
+            <blockquote>"The travel agent found a riad I'd never have spotted and shaved €400 off our quote. Wizardry."</blockquote>
+            <figcaption>— Devin K., Austin</figcaption>
+          </figure>
+          <figure class="quote">
+            <blockquote>"Aurora trip to Iceland, planned around the forecast. Genuinely the easiest holiday I've ever booked."</blockquote>
+            <figcaption>— Priya S., Manchester</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- CTA band -->
+      <section class="cta-band">
+        <h2>Ready for an adventure worth the trek?</h2>
+        <p>Our travel agent is online now. Ask anything — destinations, dates, budgets — and watch your trip take shape.</p>
+        <button class="btn btn-primary btn-lg js-open-chat" type="button">Chat with our travel agent</button>
+      </section>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-cols">
+          <div class="footer-brand">
+            <a class="site-brand" href="#top">
+              <img class="site-brand-mark" src="./assets/untethered365-logo.svg" alt="" />
+              <span class="site-brand-name">Trek or Treat <span>Travel</span></span>
+            </a>
+            <p>Adventures worth the trek. Hand-built trips for the wonderfully curious.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Explore</h4>
+            <a href="#destinations">Destinations</a>
+            <a href="#how">How it works</a>
+            <a href="#stories">Traveler stories</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="#why">About us</a>
+            <a href="#top">Careers</a>
+            <a href="#top">Press</a>
+          </div>
+          <div class="footer-col">
+            <h4>Support</h4>
+            <button class="footer-link js-open-chat" type="button">Talk to an agent</button>
+            <a href="#top">Help center</a>
+            <a href="#top">Travel insurance</a>
+          </div>
+        </div>
+        <div class="footer-base">
+          <span>© 2026 Trek or Treat Travel. A fictional demo brand.</span>
+          <span>Made for wanderers 🎒</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
   <!-- Floating assistant: chat window (left half) + panel dock (right half) -->
   <div class="assistant" id="assistant">
-    <section class="chat-window" id="chatWindow" aria-label="Untethered365 Travel Agent">
+    <section class="chat-window" id="chatWindow" aria-label="Trek or Treat Travel agent">
       <header class="topbar">
         <div class="brand">
-          <img class="brand-mark" src="./assets/untethered365-logo.svg" alt="Untethered365" />
-          <span class="brand-name">Untethered365 Travel Agent</span>
+          <img class="brand-mark" src="./assets/untethered365-logo.svg" alt="Trek or Treat Travel" />
+          <span class="brand-name">Trek or Treat Travel</span>
         </div>
         <div class="status-pills">
           <button id="showMapButton" class="panel-toggle hidden" aria-label="Show map" title="Show map">
@@ -68,7 +279,7 @@
           <span class="voice-status-label">Summarizing…</span>
         </div>
         <form id="composeForm" class="compose">
-          <input id="composeInput" type="text" autocomplete="off" placeholder="Ask about a trip, hotel, restaurants…"
+          <input id="composeInput" type="text" autocomplete="off" placeholder="Where to next? Ask about a trip, hotel, route…"
             aria-label="Type your message" />
           <button type="submit" class="send" aria-label="Send">
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -112,8 +323,8 @@
     </div>
   </div>
 
-  <!-- Floating launcher: opens/closes the assistant. Uses the Untethered365 logo. -->
-  <button class="launcher" id="launcher" aria-label="Open Untethered365 Travel Agent" aria-expanded="false" title="Untethered365 Travel Agent">
+  <!-- Floating launcher: opens/closes the assistant. -->
+  <button class="launcher" id="launcher" aria-label="Open Trek or Treat Travel agent" aria-expanded="false" title="Chat with our travel agent">
     <span class="launcher-pulse" aria-hidden="true"></span>
     <img class="launcher-logo" src="./assets/untethered365-logo.svg" alt="" aria-hidden="true" />
     <svg class="launcher-close" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
