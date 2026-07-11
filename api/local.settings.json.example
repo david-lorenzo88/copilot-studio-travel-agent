@@ -1,0 +1,25 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "",
+
+    "//": "DirectLine — long-lived bot secret from Copilot Studio > Channels > Direct Line. NEVER ship to the browser; the /api/directline/token function exchanges it for a short-lived token.",
+    "DIRECTLINE_SECRET": "<your-directline-secret>",
+
+    "//speech": "Azure Speech (or Foundry multi-service) resource, used by /api/speech/token.",
+    "SPEECH_KEY": "<your-speech-key>",
+    "SPEECH_REGION": "swedencentral",
+
+    "//dataverse": "Dataverse environment + Entra service principal, used by the dataverse-* functions.",
+    "DATAVERSE_URL": "https://YOUR-ORG.crm4.dynamics.com",
+    "ENTRA_TENANT_ID": "<tenant-guid>",
+    "ENTRA_CLIENT_ID": "<app-registration-client-id>",
+    "ENTRA_CLIENT_SECRET": "<app-registration-client-secret>",
+
+    "//foundry": "Azure AI Foundry endpoint used by /api/foundry/summarize (voice summarization).",
+    "FOUNDRY_ENDPOINT": "https://YOUR-FOUNDRY.services.ai.azure.com",
+    "FOUNDRY_DEPLOYMENT": "gpt-5.4"
+  },
+  "ConnectionStrings": {}
+}

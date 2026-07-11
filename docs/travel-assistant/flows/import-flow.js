@@ -12,10 +12,12 @@
  *     role in the target Dataverse environment.
  *
  * Usage:
- *   node import-flow.js [--env <orgUrl>] [--solution <uniqueName>] [--dry-run]
+ *   node import-flow.js --env <orgUrl> [--solution <uniqueName>] [--dry-run]
+ *
+ * The org URL is required — pass --env or set the DATAVERSE_URL environment
+ * variable (e.g. https://YOUR-ORG.crm4.dynamics.com). No org is hardcoded.
  *
  * Defaults:
- *   --env       https://premium-us.crm.dynamics.com
  *   --solution  TravelAssistant
  */
 
@@ -28,7 +30,11 @@ const path = require('path');
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 const args = parseArgs(process.argv.slice(2));
-const ORG_URL      = (args['env']      || 'https://premium-us.crm.dynamics.com').replace(/\/$/, '');
+const ORG_URL      = (args['env'] || process.env.DATAVERSE_URL || '').replace(/\/$/, '');
+if (!ORG_URL) {
+  console.error('Error: org URL required. Pass --env <orgUrl> or set DATAVERSE_URL (e.g. https://YOUR-ORG.crm4.dynamics.com).');
+  process.exit(1);
+}
 const SOLUTION     = args['solution']  || 'TravelAssistant';
 const FLOW_NAME    = 'CreateDraftQuotation';
 const FLOW_UNIQUE  = 'tra_CreateDraftQuotation';

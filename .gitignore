@@ -9,13 +9,23 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Azure Functions - local settings contain secrets, never commit
+# Azure Functions - local settings contain secrets, never commit.
+# Use api/local.settings.json.example as a template.
 local.settings.json
 
-# Environment files
+# Environment files - never commit real keys/endpoints.
+# Use the matching *.env.example files as templates.
 .env
 .env.local
 .env.*.local
+
+# Python (scraper: docs/travel-assistant/scraper)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.python-version
 
 # Build output
 dist/
@@ -35,3 +45,7 @@ logs/
 
 # Playwright / Chromium cache (pdf-service)
 api/pdf-service/.playwright/
+
+# Local test artifacts (pdf-service)
+api/pdf-service/test.pdf
+api/pdf-service/test.json

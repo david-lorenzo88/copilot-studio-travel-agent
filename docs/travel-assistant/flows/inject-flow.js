@@ -10,7 +10,10 @@
  * Web API for export/import.
  *
  * Usage:
- *   node inject-flow.js [--env <orgUrl>] [--solution <uniqueName>] [--dry-run]
+ *   node inject-flow.js --env <orgUrl> [--solution <uniqueName>] [--dry-run]
+ *
+ * The org URL is required — pass --env or set the DATAVERSE_URL environment
+ * variable (e.g. https://YOUR-ORG.crm4.dynamics.com). No org is hardcoded.
  */
 
 'use strict';
@@ -23,7 +26,11 @@ const os   = require('os');
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const args       = parseArgs(process.argv.slice(2));
-const ORG_URL    = (args['env']      || 'https://premium-us.crm.dynamics.com').replace(/\/$/, '');
+const ORG_URL    = (args['env'] || process.env.DATAVERSE_URL || '').replace(/\/$/, '');
+if (!ORG_URL) {
+  console.error('Error: org URL required. Pass --env <orgUrl> or set DATAVERSE_URL (e.g. https://YOUR-ORG.crm4.dynamics.com).');
+  process.exit(1);
+}
 const SOLUTION   = args['solution']  || 'TravelAssistant';
 const FLOW_NAME  = 'CreateDraftQuotation';
 const DRY_RUN    = 'dry-run' in args;
